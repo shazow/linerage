@@ -1,7 +1,11 @@
+function message(s) {
+    $("#messages").hide().fadeIn('fast').text(s);
+}
+
 function World(target) {
     this.target = target;
     this.size = [640, 480];
-    this.boundary = [0, 0, this.size[0], this.size[1]];
+    this.boundary = [0, 0, this.size[0]-1, this.size[1]-1];
 
     this.canvas = $('<canvas width="' + this.size[0] + 'px" height="' + this.size[1] + 'px"></canvas>').appendTo(this.target);
     this.context = this.canvas[0].getContext("2d");
@@ -37,8 +41,6 @@ function Player(world, color, name, controls) {
     this.color = color;
     this.name = name;
     this.controls = controls;
-
-    this.move();
 }
 Player.prototype = {
     reset: function() {
@@ -76,11 +78,11 @@ Player.prototype = {
     is_collided: function(world) {
         var pos = this.get_pos();
         if(!in_boundary(pos, world.boundary)) {
-            console.log(this.name + " fell off. lol!");
+            message(this.name + " fell off. lol!");
             return true;
         }
         if(Math.max(world.has_at(pos))) {
-            console.log(this.name + " collided!");
+            message(this.name + " collided.");
             return true;
         }
         return false;
@@ -90,12 +92,15 @@ Player.prototype = {
 var world, players;
 
 function start_game() {
-    world = new World($("#container"));
+    world = new World($("#game"));
     players = [
         new Player(world, 'rgba(200,20,20,0.8)', 'Red', {'left': 37, 'right': 39}),
         new Player(world, 'rgba(80,80,240,0.8)', 'Blue', {'left': 65, 'right': 83}),
     ];
     var num_players = players.length, last_player;
+    var num_end = Math.min(1, num_players-1)
+    var is_ended = true;
+    var is_paused = false;
 
     var loop;
     function game_loop() {
@@ -108,11 +113,35 @@ function start_game() {
             active_players++;
             p.move();
         }
-        if(active_players==1) {
+        if(active_players==num_end) {
+            is_ended = true;
+            is_paused = true;
             clearInterval(loop);
+
+            if(num_end==0) message("You died.");
+            else message(last_player.name + " wins!");
         }
     }
-    loop = window.setInterval(game_loop, 12);
+
+    function pause() {
+        message("Paused.");
+        is_paused = true;
+        clearInterval(loop);
+    }
+    function resume() {
+        message("");
+        is_paused = false;
+        loop = setInterval(game_loop, 12);
+    }
+
+    function reset() {
+        for(var i=0; i<num_players; i++) players[i].reset();
+        world.reset();
+
+        is_ended = false;
+        clearInterval(loop);
+        resume();
+    }
 
     // Bind controls
     $(document).keydown(function(e) {
@@ -125,11 +154,9 @@ function start_game() {
         } else if(e.which == 83) {
             players[1].move_buffer = 'right';
         } else if(e.which == 32) {
-            console.log('Resetting');
-            clearInterval(loop);
-            for(var i=0; i<num_players; i++) players[i].reset();
-            world.reset();
-            loop = window.setInterval(game_loop, 12);
+            if(is_ended) reset();
+            else if(is_paused) resume();
+            else pause();
         }
     }).keyup(function(e) {
         if(e.which == 37 || e.which == 39) players[0].move_buffer = null;

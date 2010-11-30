@@ -13,10 +13,20 @@
     body {
         background: #222;
     }
-    #container {
+    #game {
         background: #000;
         width: 640px;
         height: 480px;
+        margin: 20px auto;
+    }
+    #messages {
+        color: #e69d1e;
+        text-shadow: 1px 1px 0px #000;
+        font-size: 28px;
+        font-family: monospace;
+        text-align: center;
+
+        width: 640px;
         margin: 20px auto;
     }
 </style>
@@ -24,9 +34,8 @@
 </head>
 <body>
 
-<div id="container">
-
-</div>
+<div id="game"></div>
+<div id="messages">Ready?</div>
 
 <script src="js/jquery-1.4.4.min.js"></script>
 <script src="js/jquery.disable.text.select.js"></script>
