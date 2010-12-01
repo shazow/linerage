@@ -17,28 +17,20 @@ function World(canvas) {
 
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
+    this.context.lineWidth = 1.5;
 }
 World.prototype = {
     has_at: function(pos) {
         var pixel = this.context.getImageData(pos[0], pos[1], 1, 1);
         return Math.max(pixel.data[0], pixel.data[1], pixel.data[2]) != 0;
     },
-    set_at: function(pos, color) {
-        var ctx = this.context;
-        ctx.save();
-        ctx.fillStyle = color;
-        ctx.fillRect(pos[0], pos[1], 1, 1);
-        ctx.restore();
-    },
     set_line: function(pos1, pos2, color) {
         var ctx = this.context;
-        ctx.save();
         ctx.strokeStyle = color;
         ctx.beginPath();
         ctx.moveTo(pos1[0], pos1[1]);
         ctx.lineTo(pos2[0], pos2[1]);
         ctx.stroke();
-        ctx.restore();
     },
     reset: function() {
         this.context.clearRect(0, 0, this.size[0], this.size[1]);
@@ -97,7 +89,7 @@ Player.prototype = {
             message(this.name + " fell off. lol!");
             return true;
         }
-        if(Math.max(world.has_at(pos))) {
+        if(world.has_at(pos)) {
             message(this.name + " collided.");
             return true;
         }
