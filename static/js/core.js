@@ -1,13 +1,22 @@
 function message(s) {
-    $("#messages").hide().html(s).fadeIn('fast');
+    message._buffer = s;
+    return message;
+}
+message._buffer = null;
+message._target = null;
+message.render = function() {
+    if(message._buffer==null) return;
+    if(!message._target) message._target = document.getElementById("messages");
+    message._target.innerHTML = message._buffer;
+    message._buffer = null;
 }
 
 function World(canvas) {
-    this.size = [canvas.width(), canvas.height()];
+    this.size = [canvas.width, canvas.height];
     this.boundary = [0, 0, this.size[0]-1, this.size[1]-1];
 
     this.canvas = canvas;
-    this.context = this.canvas[0].getContext("2d");
+    this.context = this.canvas.getContext("2d");
 }
 World.prototype = {
     has_at: function(pos) {
@@ -23,18 +32,20 @@ World.prototype = {
     },
     set_line: function(pos1, pos2, color) {
         var ctx = this.context;
+        ctx.save();
         ctx.strokeStyle = color;
         ctx.beginPath();
         ctx.moveTo(pos1[0], pos1[1]);
         ctx.lineTo(pos2[0], pos2[1]);
         ctx.stroke();
+        ctx.restore();
     },
     reset: function() {
         this.context.clearRect(0, 0, this.size[0], this.size[1]);
     }
 }
 
-function Player(world, color, name, controls) {
+function Player(game, config) {
     // Constants
     this.turn_rate = 0.045;
     this.speed = 3;
@@ -44,10 +55,10 @@ function Player(world, color, name, controls) {
     this.reset();
 
     // Init
-    this.world = world;
-    this.color = color;
-    this.name = name;
-    this.controls = controls;
+    this.game = game;
+    this.color = config.color || 'rgba(255,255,255,1)';
+    this.name = config.name || 'Anonymous';
+    this.controls = config.controls;
 }
 Player.prototype = {
     reset: function() {
@@ -56,7 +67,7 @@ Player.prototype = {
         this.angle = Math.random() * 2;
         this.move_buffer = null;
     },
-    move: function() {
+    move: function(world) {
         if(this.move_buffer) {
             if(this.move_buffer == 'left') this.angle -= this.turn_rate;
             else if(this.move_buffer == 'right') this.angle += this.turn_rate;
@@ -73,8 +84,8 @@ Player.prototype = {
         // Skip render to rounding?
         if(new_pos[0] == old_pos[0] && new_pos[1] == old_pos[1]) return;
 
-        this.loser = this.is_collided(this.world);
-        this.world.set_line(old_pos, new_pos, this.color);
+        this.loser = this.is_collided(world);
+        world.set_line(old_pos, new_pos, this.color);
     },
     get_pos: function() {
         // Get normalized position on context
@@ -91,82 +102,157 @@ Player.prototype = {
             return true;
         }
         return false;
+    },
+    bind_control_listen: function(name) {
+        var fn = document.onkeydown;
+        var self = this;
+        document.onkeydown = function(e) {
+            if(e.which == 32 || e.which == 33) return; // Reserved: ESC and SPACE
+            self.controls[name] = e.which;
+            document.onkeydown = fn;
+
+            self.world._refresh_controls_cache();
+            message("Bound key for player " + self.name +": " + name + " &rarr; " +  KEY_CODES[e.which]).render();
+        }
     }
 }
+Player.CONTROL_KEYS = ['left', 'right'];
+Player.TEMPLATE_LIST = [
+    {color: 'rgba(200,20,20,0.8)', name: 'Red', controls: {'left': 37, 'right': 39}}, // LEFT, RIGHT
+    {color: 'rgba(80,80,240,0.8)', name: 'Blue', controls: {'left': 65, 'right': 83}}, // A, S
+    {color: 'rgba(80,240,80,0.8)', name: 'Green', controls: {'left': 75, 'right': 76}}, // K, S
+    {color: 'rgba(240,200,40,0.8)', name:  'Yellow', controls: {'left': 101, 'right': 103}} // NUM_4, NUM_6
+]
 
-var world, players;
-
-function start_game() {
-    world = new World($("#game canvas"));
-    players = [
-        new Player(world, 'rgba(200,20,20,0.8)', 'Red', {'left': 37, 'right': 39}),
-        new Player(world, 'rgba(80,80,240,0.8)', 'Blue', {'left': 65, 'right': 83}),
+function Game(canvas) {
+    this.world = new World(canvas);
+    this.players = [
+        new Player(this, Player.TEMPLATE_LIST[0]),
     ];
-    var num_players = players.length, last_player;
-    var num_end = Math.min(1, num_players-1)
-    var is_ended = true;
-    var is_paused = false;
 
-    var loop;
-    function game_loop() {
+    this.num_players = this.players.length;
+    this.last_player = null;
+    this.num_end = Math.min(1, this.num_players-1);
+
+    this.is_paused = false;
+    this.is_ended = true;
+
+    this.loop = null;
+
+    var self = this;
+    this.game_loop = function() {
+        message.render();
+
         var active_players = 0;
-        for(var i=0; i<num_players; i++) {
-            var p = players[i];
-            if(p.loser) continue
+        for(var i=0; i<self.num_players; i++) {
+            var p = self.players[i];
+            if(p.loser) continue;
 
-            last_player = p;
+            self.last_player = p;
             active_players++;
-            p.move();
+            p.move(self.world);
         }
-        if(active_players==num_end) {
-            is_ended = true;
-            is_paused = true;
-            clearInterval(loop);
+        if(active_players==self.num_end) {
+            self.end();
+            clearInterval(self.loop);
 
-            if(num_end==0) message("You died.");
-            else message(last_player.name + " wins!");
+            if(self.num_end==0) message("You died.").render();
+            else message(self.last_player.name + " wins!").render();
         }
     }
 
-    function pause() {
-        message("Paused.");
-        is_paused = true;
-        clearInterval(loop);
-    }
-    function resume() {
-        message("");
-        is_paused = false;
-        loop = setInterval(game_loop, 36);
-    }
-
-    function reset() {
-        for(var i=0; i<num_players; i++) players[i].reset();
-        world.reset();
-
-        is_ended = false;
-        clearInterval(loop);
-        resume();
-    }
+    this._refresh_controls_cache();
 
     // Bind controls
-    $(document).keydown(function(e) {
-        if(e.which == 37) {
-            players[0].move_buffer = 'left';
-        } else if(e.which == 39) {
-            players[0].move_buffer = 'right';
-        } else if(e.which == 65) {
-            players[1].move_buffer = 'left';
-        } else if(e.which == 83) {
-            players[1].move_buffer = 'right';
-        } else if(e.which == 32) {
-            if(is_ended) reset();
-            else if(is_paused) resume();
-            else pause();
+    document.onkeydown = function(e) {
+        // Find which player owns the key
+        if(e.which == 32) {
+            if(self.is_ended) self.reset();
+            else if(self.is_paused) self.resume();
+            else self.pause();
+            return;
         }
-    }).keyup(function(e) {
-        if(e.which == 37 || e.which == 39) players[0].move_buffer = null;
-        else if(e.which == 65 || e.which == 83) players[1].move_buffer = null;
-    });
 
-    message("Ready? Press <em>Space</em> to start.");
+        var player_action = self._controls_cache[e.which];
+        if(player_action) player_action[0].move_buffer = player_action[1];
+    };
+    document.onkeyup = function(e) {
+        if(e.which == 32) return;
+
+        var player_action = self._controls_cache[e.which];
+        if(player_action && player_action[0].move_buffer == player_action[1]) player_action[0].move_buffer = null;
+    };
+
+    this.ui = {
+        'root': $("#game nav"),
+        'players': $('<ul id="players"></ul>'),
+        'add_player': $('<input type="button" value="Add Player"></input>').click(function() {
+            self.add_player();
+        }),
+        'remove_player': $('<input type="button" value="Remove Player"></input>').click(function() {
+            self.remove_player();
+        })
+    };
+    this.ui['root'].append(this.ui['add_player']).append(this.ui['remove_player']);
+
+    message("Ready? Press <em>Space</em> to start.").render();
+}
+Game.prototype = {
+    pause: function() {
+        message("Paused.").render();
+        this.is_paused = true;
+        clearInterval(this.loop);
+    },
+    resume: function() {
+        message("").render();
+        this.is_paused = false;
+        this.loop = setInterval(this.game_loop, 36);
+    },
+    end: function() {
+        this.is_ended = true;
+        this.is_paused = true;
+
+        this.ui['root'].removeClass('inactive');
+    },
+    reset: function() {
+        for(var i=0; i<this.num_players; i++) this.players[i].reset();
+        this.world.reset();
+
+        this.is_ended = false;
+        clearInterval(this.loop);
+        this.resume();
+
+        this.ui['root'].addClass('inactive');
+    },
+    add_player: function() {
+        if(!this.is_ended || this.num_players >= 4) return;
+        this.players.push(new Player(this, Player.TEMPLATE_LIST[this.num_players]));
+        this.num_players = this.players.length;
+        this.num_end = Math.min(1, this.num_players-1);
+        this._refresh_controls_cache();
+
+        message("Added player, there is now " + this.num_players + " of you.").render();
+    },
+    remove_player: function() {
+        if(!this.is_ended || this.num_players <= 1) return;
+        this.players.pop();
+        this.num_players = this.players.length;
+        this.num_end = Math.min(1, this.num_players-1);
+        this._refresh_controls_cache();
+
+        message("Removed player, there is now " + this.num_players + " of you.").render();
+    },
+    draw_scoreboard: function() {
+    },
+    _refresh_controls_cache: function() {
+        var cache = {};
+        for(var i=0, istop=this.players.length; i<istop; i++) {
+            var p = this.players[i];
+            for(var j=0, jstop=Player.CONTROL_KEYS.length; j<jstop; j++) {
+                var name = Player.CONTROL_KEYS[j];
+                cache[p.controls[name]] = [p, name];
+            }
+        }
+        this._controls_cache = cache;
+    }
 }

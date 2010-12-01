@@ -20,11 +20,8 @@
     }
     #game nav {
         float: left;
-        width: 100px;
-    }
-    #game #scoreboard {
-        float: right;
-        width: 100px;
+        width: 200px;
+        margin-left: -100px;
     }
     #messages {
         color: #e69d1e;
@@ -44,19 +41,25 @@
         text-align: center;
         line-height: 42px;
     }
+    input {
+        width: 95px;
+        border: 1px solid #aaa;
+        background: #666;
+        font-weight: bold;
+        margin: 2px;
+    }
+    .inactive {
+        opacity: 0.3;
+    }
 </style>
 
 </head>
 <body>
 
-<div id="intro">It's my birthay, so I made everybody a game. It's like Tron with curvy lines and more fun.</div>
+<div id="intro">LineRage. It's like Tron but with curvy lines and more fun.</div>
 <div id="game">
-    <nav>
-        <ul>
-
-        </ul>
-    </nav>
-    <canvas width="640" height="480" style="background: #000;"></canvas>
+    <nav></nav>
+    <canvas id="game_canvas" width="640" height="480" style="background: #000;"></canvas>
     <div id="scoreboard">
         <p></p>
     </div>
@@ -64,11 +67,10 @@
 <div id="messages">Loading.</div>
 
 <script src="js/jquery-1.4.4.min.js"></script>
-<script src="js/jquery.disable.text.select.js"></script>
 <script src="js/util.js"></script>
 <script src="js/core.js"></script>
 <script>
-    start_game();
+    var game = new Game(document.getElementById("game_canvas"));
 </script>
 
 </body>
