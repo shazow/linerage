@@ -1,13 +1,12 @@
 function message(s) {
-    $("#messages").hide().fadeIn('fast').text(s);
+    $("#messages").hide().html(s).fadeIn('fast');
 }
 
-function World(target) {
-    this.target = target;
-    this.size = [640, 480];
+function World(canvas) {
+    this.size = [canvas.width(), canvas.height()];
     this.boundary = [0, 0, this.size[0]-1, this.size[1]-1];
 
-    this.canvas = $('<canvas width="' + this.size[0] + 'px" height="' + this.size[1] + 'px"></canvas>').appendTo(this.target);
+    this.canvas = canvas;
     this.context = this.canvas[0].getContext("2d");
 }
 World.prototype = {
@@ -22,6 +21,14 @@ World.prototype = {
         ctx.fillRect(pos[0], pos[1], 1, 1);
         ctx.restore();
     },
+    set_line: function(pos1, pos2, color) {
+        var ctx = this.context;
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(pos1[0], pos1[1]);
+        ctx.lineTo(pos2[0], pos2[1]);
+        ctx.stroke();
+    },
     reset: function() {
         this.context.clearRect(0, 0, this.size[0], this.size[1]);
     }
@@ -29,8 +36,8 @@ World.prototype = {
 
 function Player(world, color, name, controls) {
     // Constants
-    this.turn_rate = 0.015;
-    this.speed = 1;
+    this.turn_rate = 0.045;
+    this.speed = 3;
     this.angle = 0;
 
     // Reset
@@ -67,9 +74,7 @@ Player.prototype = {
         if(new_pos[0] == old_pos[0] && new_pos[1] == old_pos[1]) return;
 
         this.loser = this.is_collided(this.world);
-        if(this.loser) return;
-
-        this.world.set_at(new_pos, this.color);
+        this.world.set_line(old_pos, new_pos, this.color);
     },
     get_pos: function() {
         // Get normalized position on context
@@ -92,7 +97,7 @@ Player.prototype = {
 var world, players;
 
 function start_game() {
-    world = new World($("#game"));
+    world = new World($("#game canvas"));
     players = [
         new Player(world, 'rgba(200,20,20,0.8)', 'Red', {'left': 37, 'right': 39}),
         new Player(world, 'rgba(80,80,240,0.8)', 'Blue', {'left': 65, 'right': 83}),
@@ -131,7 +136,7 @@ function start_game() {
     function resume() {
         message("");
         is_paused = false;
-        loop = setInterval(game_loop, 12);
+        loop = setInterval(game_loop, 36);
     }
 
     function reset() {
@@ -162,4 +167,6 @@ function start_game() {
         if(e.which == 37 || e.which == 39) players[0].move_buffer = null;
         else if(e.which == 65 || e.which == 83) players[1].move_buffer = null;
     });
+
+    message("Ready? Press <em>Space</em> to start.");
 }

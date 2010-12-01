@@ -12,16 +12,23 @@
 <style type="text/css">
     body {
         background: #222;
+        margin: 0; padding: 0;
     }
     #game {
-        background: #000;
-        width: 640px;
-        height: 480px;
-        margin: 20px auto;
+        width: 840px;
+        margin: 0px auto;
+    }
+    #game nav {
+        float: left;
+        width: 100px;
+    }
+    #game #scoreboard {
+        float: right;
+        width: 100px;
     }
     #messages {
         color: #e69d1e;
-        text-shadow: 1px 1px 0px #000;
+        text-shadow: 2px 2px 0px #000;
         font-size: 28px;
         font-family: monospace;
         text-align: center;
@@ -29,13 +36,32 @@
         width: 640px;
         margin: 20px auto;
     }
+    #intro {
+        color: #999;
+        text-shadow: 0px 1px 1px #000;
+        font-size: 16px;
+        font-family: georgia, serif;
+        text-align: center;
+        line-height: 42px;
+    }
 </style>
 
 </head>
 <body>
 
-<div id="game"></div>
-<div id="messages">Ready?</div>
+<div id="intro">It's my birthay, so I made everybody a game. It's like Tron with curvy lines and more fun.</div>
+<div id="game">
+    <nav>
+        <ul>
+
+        </ul>
+    </nav>
+    <canvas width="640" height="480" style="background: #000;"></canvas>
+    <div id="scoreboard">
+        <p></p>
+    </div>
+</div>
+<div id="messages">Loading.</div>
 
 <script src="js/jquery-1.4.4.min.js"></script>
 <script src="js/jquery.disable.text.select.js"></script>
