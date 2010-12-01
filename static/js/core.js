@@ -42,6 +42,8 @@ function Player(game, config) {
     this.turn_rate = 0.045;
     this.speed = 3;
     this.angle = 0;
+    this.max_time_alive = 0;
+    this.num_wins = 0;
 
     // Reset
     this.reset();
@@ -77,6 +79,7 @@ Player.prototype = {
         if(new_pos[0] == old_pos[0] && new_pos[1] == old_pos[1]) return;
 
         this.loser = this.is_collided(world);
+        if(this.loser) this.max_time_alive = Math.max(this.max_time_alive, this.game.time_elapsed);
         world.set_line(old_pos, new_pos, this.color);
     },
     get_pos: function() {
@@ -110,10 +113,10 @@ Player.prototype = {
 }
 Player.CONTROL_KEYS = ['left', 'right'];
 Player.TEMPLATE_LIST = [
-    {color: 'rgba(200,20,20,0.8)', name: 'Red', controls: {'left': 37, 'right': 39}}, // LEFT, RIGHT
-    {color: 'rgba(80,80,240,0.8)', name: 'Blue', controls: {'left': 65, 'right': 83}}, // A, S
-    {color: 'rgba(80,240,80,0.8)', name: 'Green', controls: {'left': 75, 'right': 76}}, // K, S
-    {color: 'rgba(240,200,40,0.8)', name:  'Yellow', controls: {'left': 101, 'right': 103}} // NUM_4, NUM_6
+    {color: 'rgba(200,20,20,0.8)', name: 'Red Player', controls: {'left': 37, 'right': 39}}, // LEFT, RIGHT
+    {color: 'rgba(80,80,240,0.8)', name: 'Blue Player', controls: {'left': 65, 'right': 83}}, // A, S
+    {color: 'rgba(80,240,80,0.8)', name: 'Green Player', controls: {'left': 75, 'right': 76}}, // K, S
+    {color: 'rgba(240,200,40,0.8)', name:  'Yellow Player', controls: {'left': 101, 'right': 103}} // NUM_4, NUM_6
 ]
 
 function Game(canvas) {
@@ -130,6 +133,7 @@ function Game(canvas) {
     this.is_ended = true;
 
     this.loop = null;
+    this.time_elapsed = 0;
 
     var self = this;
     this.game_loop = function() {
@@ -145,12 +149,19 @@ function Game(canvas) {
             p.move(self.world);
         }
         if(active_players==self.num_end) {
-            self.end();
             clearInterval(self.loop);
 
             if(self.num_end==0) message("You died.").render();
-            else message(self.last_player.name + " wins!").render();
+            else {
+                message(self.last_player.name + " wins!").render();
+                self.last_player.num_wins++;
+                self.last_player.max_time_alive = Math.max(self.last_player.max_time_alive, self.time_elapsed);
+            }
+            self.end();
         }
+
+        self.ui['timer'].text(Number(self.time_elapsed).toFixed(1));
+        self.time_elapsed += 0.036;
     }
 
     this._refresh_controls_cache();
@@ -178,6 +189,7 @@ function Game(canvas) {
     this.ui = {
         'root': $("#game nav"),
         'players': $('<ul id="players"></ul>'),
+        'timer': $('<div id="timer">0.0</div>'),
         'add_player': $('<input type="button" value="Add Player"></input>').click(function() {
             self.add_player();
         }),
@@ -185,7 +197,8 @@ function Game(canvas) {
             self.remove_player();
         })
     };
-    this.ui['root'].append(this.ui['add_player']).append(this.ui['remove_player']);
+    this.ui['root'].append(this.ui['timer']).append(this.ui['add_player']).append(this.ui['remove_player']).append(this.ui['players']);
+    this.draw_scoreboard();
 
     message("Ready? Press <em>Space</em> to start.").render();
 }
@@ -205,10 +218,12 @@ Game.prototype = {
         this.is_paused = true;
 
         this.ui['root'].removeClass('inactive');
+        this.draw_scoreboard();
     },
     reset: function() {
         for(var i=0; i<this.num_players; i++) this.players[i].reset();
         this.world.reset();
+        this.time_elapsed = 0;
 
         this.is_ended = false;
         clearInterval(this.loop);
@@ -222,8 +237,7 @@ Game.prototype = {
         this.num_players = this.players.length;
         this.num_end = Math.min(1, this.num_players-1);
         this._refresh_controls_cache();
-
-        message("Added player, there is now " + this.num_players + " of you.").render();
+        this.draw_scoreboard();
     },
     remove_player: function() {
         if(!this.is_ended || this.num_players <= 1) return;
@@ -231,10 +245,15 @@ Game.prototype = {
         this.num_players = this.players.length;
         this.num_end = Math.min(1, this.num_players-1);
         this._refresh_controls_cache();
-
-        message("Removed player, there is now " + this.num_players + " of you.").render();
+        this.draw_scoreboard();
     },
     draw_scoreboard: function() {
+        var t = this.ui['players'];
+        t.empty();
+        for(var i=0, stop=this.num_players; i<stop; i++) {
+            var p = this.players[i];
+            t.append('<li><span class="color" style="background: '+p.color+'"></span><span class="name">'+p.name+'</span> (<span class="wins">'+p.num_wins+'</span> wins, <span class="longest">'+Number(p.max_time_alive).toFixed(1)+'s</span>)</li>');
+        }
     },
     _refresh_controls_cache: function() {
         var cache = {};

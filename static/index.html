@@ -46,11 +46,46 @@
         border: 1px solid #aaa;
         background: #666;
         font-weight: bold;
-        margin: 2px;
+        margin-right: 2px;
     }
     .inactive {
         opacity: 0.3;
     }
+    #timer {
+        font-family: monospace;
+        letter-spacing: -0.1em;
+        text-align: center;
+        color: #555;
+        text-shadow: -1px -1px 0px #666;
+        font-size: 60px;
+        line-height: 100px;
+    }
+    #players {
+        font-family: sans-serif;
+        list-style: none;
+        font-size: 12px;
+        line-height: 16px;
+        color: #888;
+        padding: 5px;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 1px #000;
+    }
+    #players li {
+        margin-top: 10px;
+    }
+    #players .color {
+        display: block;
+        float: left;
+        width: 15px;
+        height: 15px;
+        margin-right: 5px;
+        border: 1px solid #000;
+    }
+    #players .name {
+        color: #ccc;
+        font-weight: bold;
+    }
+
 </style>
 
 </head>
@@ -60,9 +95,6 @@
 <div id="game">
     <nav></nav>
     <canvas id="game_canvas" width="640" height="480" style="background: #000;"></canvas>
-    <div id="scoreboard">
-        <p></p>
-    </div>
 </div>
 <div id="messages">Loading.</div>
 
