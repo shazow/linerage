@@ -42,14 +42,22 @@
         line-height: 42px;
     }
     input {
-        width: 95px;
+        width: 80px;
         border: 1px solid #aaa;
         background: #666;
-        font-weight: bold;
-        margin-right: 2px;
+        font-size: 9px;
+        margin: 10px;
+    }
+    input:hover {
+        background: #999;
+        cursor: pointer;
     }
     .inactive {
         opacity: 0.3;
+    }
+    .inactive input:hover {
+        background: #666;
+        pointer: default;
     }
     #timer {
         font-family: monospace;
@@ -99,10 +107,14 @@
 <div id="messages">Loading.</div>
 
 <script src="js/jquery-1.4.4.min.js"></script>
+<script src="js/jquery.disable.text.select.js"></script>
 <script src="js/util.js"></script>
 <script src="js/core.js"></script>
 <script>
-    var game = new Game(document.getElementById("game_canvas"));
+    $(document).ready(function() {
+        $("body").disableTextSelect();
+        var game = new Game(document.getElementById("game_canvas"));
+    });
 </script>
 
 </body>

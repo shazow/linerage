@@ -103,11 +103,10 @@ Player.prototype = {
         var self = this;
         document.onkeydown = function(e) {
             if(e.which == 32 || e.which == 33) return; // Reserved: ESC and SPACE
+            if(self.game._controls_cache[e.which]) return; // Taken
             self.controls[name] = e.which;
             document.onkeydown = fn;
-
-            self.world._refresh_controls_cache();
-            message("Bound key for player " + self.name +": " + name + " &rarr; " +  KEY_CODES[e.which]).render();
+            self.game._refresh_controls_cache();
         }
     }
 }
@@ -121,9 +120,7 @@ Player.TEMPLATE_LIST = [
 
 function Game(canvas) {
     this.world = new World(canvas);
-    this.players = [
-        new Player(this, Player.TEMPLATE_LIST[0]),
-    ];
+    this.players = [];
 
     this.num_players = this.players.length;
     this.last_player = null;
@@ -164,8 +161,6 @@ function Game(canvas) {
         self.time_elapsed += 0.036;
     }
 
-    this._refresh_controls_cache();
-
     // Bind controls
     document.onkeydown = function(e) {
         // Find which player owns the key
@@ -198,7 +193,9 @@ function Game(canvas) {
         })
     };
     this.ui['root'].append(this.ui['timer']).append(this.ui['add_player']).append(this.ui['remove_player']).append(this.ui['players']);
-    this.draw_scoreboard();
+
+    this.add_player();
+    this.add_player();
 
     message("Ready? Press <em>Space</em> to start.").render();
 }
@@ -237,7 +234,6 @@ Game.prototype = {
         this.num_players = this.players.length;
         this.num_end = Math.min(1, this.num_players-1);
         this._refresh_controls_cache();
-        this.draw_scoreboard();
     },
     remove_player: function() {
         if(!this.is_ended || this.num_players <= 1) return;
@@ -245,14 +241,30 @@ Game.prototype = {
         this.num_players = this.players.length;
         this.num_end = Math.min(1, this.num_players-1);
         this._refresh_controls_cache();
-        this.draw_scoreboard();
     },
     draw_scoreboard: function() {
+        var self = this;
         var t = this.ui['players'];
         t.empty();
         for(var i=0, stop=this.num_players; i<stop; i++) {
             var p = this.players[i];
-            t.append('<li><span class="color" style="background: '+p.color+'"></span><span class="name">'+p.name+'</span> (<span class="wins">'+p.num_wins+'</span> wins, <span class="longest">'+Number(p.max_time_alive).toFixed(1)+'s</span>)</li>');
+            var player_ui = $('<li> \
+                <span class="color" style="background: '+p.color+'"></span> \
+                <span class="name">'+p.name+'</span> \
+                (<span class="wins">'+p.num_wins+'</span> wins, <span class="longest">'+Number(p.max_time_alive).toFixed(1)+'s</span>) \
+            </li>');
+            var controls = $('<div class="controls"></div>');
+            for(var j=0, jstop=Player.CONTROL_KEYS.length; j<jstop; j++) {
+                var name = Player.CONTROL_KEYS[j];
+                var button = p.controls[name];
+                $('<span class="button">'+KEY_CODES[button]+'</span>').click(function() {
+                    self.draw_scoreboard();
+                    $(this).text("(Set)");
+                    console.log(p.name);
+                    p.bind_control_listen(name);
+                }).appendTo(controls);
+            }
+            t.append(player_ui.append(controls));
         }
     },
     _refresh_controls_cache: function() {
@@ -265,5 +277,6 @@ Game.prototype = {
             }
         }
         this._controls_cache = cache;
+        this.draw_scoreboard();
     }
 }
