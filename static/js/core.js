@@ -252,19 +252,9 @@ Game.prototype = {
                 <span class="color" style="background: '+p.color+'"></span> \
                 <span class="name">'+p.name+'</span> \
                 (<span class="wins">'+p.num_wins+'</span> wins, <span class="longest">'+Number(p.max_time_alive).toFixed(1)+'s</span>) \
+                <div class="controls"><span class="button">'+ KEY_CODES[p.controls['left']] +'</span> &harr; <span class="button">'+ KEY_CODES[p.controls['right']] +'</span></div> \
             </li>');
-            var controls = $('<div class="controls"></div>');
-            for(var j=0, jstop=Player.CONTROL_KEYS.length; j<jstop; j++) {
-                var name = Player.CONTROL_KEYS[j];
-                var button = p.controls[name];
-                $('<span class="button">'+KEY_CODES[button]+'</span>').click(function() {
-                    self.draw_scoreboard();
-                    $(this).text("(Set)");
-                    console.log(p.name);
-                    p.bind_control_listen(name);
-                }).appendTo(controls);
-            }
-            t.append(player_ui.append(controls));
+            t.append(player_ui);
         }
     },
     _refresh_controls_cache: function() {
