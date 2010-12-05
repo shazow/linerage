@@ -18,7 +18,7 @@ function World(canvas) {
 
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
-    this.context.lineWidth = 1;
+    this.context.lineWidth = 1.5;
 }
 World.prototype = {
     set_line: function(pos1, pos2, color) {
@@ -48,8 +48,8 @@ World.prototype = {
 
 function Player(game, config) {
     // Constants
-    this.speed = 6; // Pixels per second
-    this.turn_rate = 1; // Radians per second
+    this.speed = 8; // Pixels per second
+    this.turn_rate = this.speed / 6; // Radians per second
     this.angle = 0;
     this.max_time_alive = 0;
     this.num_wins = 0;
@@ -160,6 +160,7 @@ function Game(canvas) {
     var self = this;
     this.game_tick = function(time_delta) {
         message.render();
+        if(self.is_paused) return;
 
         var active_players = 0;
         for(var i=0; i<self.num_players; i++) {
@@ -187,7 +188,7 @@ function Game(canvas) {
     }
     this.game_loop = function() {
         self.game_tick(new Date() - self.ticks.time_updated);
-        if(!self.is_paused) setTimeout(self.game_loop, 10);
+        if(!self.is_paused) setTimeout(self.game_loop, 40);
     }
 
     // Bind controls
@@ -201,13 +202,19 @@ function Game(canvas) {
         }
 
         var player_action = self._controls_cache[e.which];
-        if(player_action) player_action[0].move_buffer = player_action[1];
+        if(player_action) {
+            player_action[0].move_buffer = player_action[1];
+            self.game_tick(new Date() - self.ticks.time_updated);
+        }
     };
     document.onkeyup = function(e) {
         if(e.which == 32) return;
 
         var player_action = self._controls_cache[e.which];
-        if(player_action && player_action[0].move_buffer == player_action[1]) player_action[0].move_buffer = null;
+        if(player_action && player_action[0].move_buffer == player_action[1]) {
+            player_action[0].move_buffer = null;
+            self.game_tick(new Date() - self.ticks.time_updated);
+        }
     };
 
     this.ui = {
