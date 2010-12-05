@@ -1,0 +1,99 @@
+body {
+    background: #222;
+    margin: 0; padding: 0;
+}
+#game {
+    width: 640px;
+    margin: 0px auto;
+}
+#game nav {
+    position: absolute;
+    width: 200px;
+    margin-left: -200px;
+}
+#messages {
+    color: #e69d1e;
+    text-shadow: 2px 2px 0px #000;
+    font-size: 28px;
+    font-family: monospace;
+    text-align: center;
+
+    width: 640px;
+    margin: 20px auto;
+}
+#intro {
+    color: #999;
+    text-shadow: 0px 1px 1px #000;
+    font-size: 16px;
+    font-family: georgia, serif;
+    text-align: center;
+    line-height: 42px;
+}
+input {
+    width: 80px;
+    border: 1px solid #aaa;
+    background: #666;
+    font-size: 9px;
+    margin: 10px;
+}
+input:hover {
+    background: #999;
+    cursor: pointer;
+}
+.inactive {
+    opacity: 0.3;
+}
+.inactive input:hover {
+    background: #666;
+    pointer: default;
+}
+#timer {
+    font-family: monospace;
+    letter-spacing: -0.1em;
+    text-align: center;
+    color: #555;
+    text-shadow: -1px -1px 0px #666;
+    font-size: 60px;
+    line-height: 100px;
+}
+#players {
+    font-family: sans-serif;
+    list-style: none;
+    font-size: 12px;
+    line-height: 16px;
+    color: #888;
+    padding: 5px;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 1px #000;
+}
+#players li {
+    margin-top: 10px;
+}
+#players .color {
+    display: block;
+    float: left;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    border: 1px solid #000;
+}
+#players .name {
+    color: #ccc;
+    font-weight: bold;
+}
+.controls {
+    margin-left: 23px;
+    margin-top: 5px;
+    color: #555;
+}
+.controls .button {
+    color: #aaa;
+    background: #444;
+    border: 1px solid #555;
+    padding: 1px 5px;
+    cursor: default;
+
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+}
