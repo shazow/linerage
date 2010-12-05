@@ -33,10 +33,10 @@ function FrameCounter(sample_length) {
 FrameCounter.prototype = {
     tick: function() {
         this.n++;
-        this.time_updated = new Date();
+        this.time_updated = +new Date();
     },
     get_rate: function() {
-        var now = new Date();
+        var now = +new Date();
         var delta = now - this.time_sampled;
         if(delta < this.sample_length) return this.last_rate;
         this.last_rate = (this.n - this.last_n) / delta;
