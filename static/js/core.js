@@ -48,8 +48,8 @@ World.prototype = {
 
 function Player(game, config) {
     // Constants
-    this.turn_rate = 1.5; // Radians per second
-    this.speed = 8; // Pixels per second
+    this.speed = 6; // Pixels per second
+    this.turn_rate = 1; // Radians per second
     this.angle = 0;
     this.max_time_alive = 0;
     this.num_wins = 0;

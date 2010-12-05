@@ -34,7 +34,6 @@ FrameCounter.prototype = {
     tick: function() {
         this.n++;
         this.time_updated = new Date();
-        if(this.n % 400 == 0) console.log(this.get_rate());
     },
     get_rate: function() {
         var now = new Date();
