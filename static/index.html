@@ -24,9 +24,10 @@
 <script src="js/util.js"></script>
 <script src="js/core.js"></script>
 <script>
+    var game;
     $(document).ready(function() {
         $("body").disableTextSelect();
-        var game = new Game(document.getElementById("game_canvas"));
+        game = new Game(document.getElementById("game_canvas"));
     });
 </script>
 <script type="text/javascript">

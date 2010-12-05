@@ -14,16 +14,13 @@ message.render = function() {
 function World(canvas) {
     this.size = [canvas.width, canvas.height];
     this.boundary = [0, 0, this.size[0]-1, this.size[1]-1];
+    this.bitmap = null;
 
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
-    this.context.lineWidth = 1.5;
+    this.context.lineWidth = 1;
 }
 World.prototype = {
-    has_at: function(pos) {
-        var pixel = this.context.getImageData(pos[0], pos[1], 1, 1);
-        return Math.max(pixel.data[0], pixel.data[1], pixel.data[2]) != 0;
-    },
     set_line: function(pos1, pos2, color) {
         var ctx = this.context;
         ctx.strokeStyle = color;
@@ -32,15 +29,27 @@ World.prototype = {
         ctx.lineTo(pos2[0], pos2[1]);
         ctx.stroke();
     },
+    track_collision: function(pos1, pos2, collision_fn) {
+        var ctx = this.context;
+        var self = this;
+        walk_line(pos1, pos2, function(pos) {
+            if(pos[0] == pos1[0] && pos[1] == pos1[1]) return; // Skip the first one
+
+            if(self.bitmap[pos[0]][pos[1]] != 0) collision_fn(pos);
+            else self.bitmap[pos[0]][pos[1]] = 1;
+        });
+
+    },
     reset: function() {
         this.context.clearRect(0, 0, this.size[0], this.size[1]);
+        this.bitmap = make_grid(this.size, 0);
     }
 }
 
 function Player(game, config) {
     // Constants
-    this.turn_rate = 0.045;
-    this.speed = 3;
+    this.turn_rate = 1.5; // Radians per second
+    this.speed = 8; // Pixels per second
     this.angle = 0;
     this.max_time_alive = 0;
     this.num_wins = 0;
@@ -61,16 +70,16 @@ Player.prototype = {
         this.angle = Math.random() * 2;
         this.move_buffer = null;
     },
-    move: function(world) {
+    move: function(world, time_delta) {
         if(this.move_buffer) {
-            if(this.move_buffer == 'left') this.angle -= this.turn_rate;
-            else if(this.move_buffer == 'right') this.angle += this.turn_rate;
+            if(this.move_buffer == 'left') this.angle -= this.turn_rate * time_delta / 1000;
+            else if(this.move_buffer == 'right') this.angle += this.turn_rate * time_delta / 1000;
         }
 
         var old_pos = this.get_pos();
 
         var x = this.pos[0], y = this.pos[1];
-        var delta = rotate([this.speed, 0], this.angle * Math.PI);
+        var delta = rotate([this.speed * time_delta / 100, 0], this.angle * Math.PI);
         this.pos = [x + delta[0], y + delta[1]];
 
         var new_pos = this.get_pos();
@@ -78,16 +87,32 @@ Player.prototype = {
         // Skip render to rounding?
         if(new_pos[0] == old_pos[0] && new_pos[1] == old_pos[1]) return;
 
-        this.loser = this.is_collided(world);
-        if(this.loser) this.max_time_alive = Math.max(this.max_time_alive, this.game.time_elapsed);
+        if(!in_boundary(new_pos, world.boundary)) {
+            message(this.name + " fell off. lol!");
+            this.loser = true;
+        }
+
+        if(!this.loser) {
+            var self = this;
+            world.track_collision(old_pos, new_pos, function(pos) {
+                message(self.name + " collided.");
+                self.loser = true;
+                new_pos = pos;
+            });
+        }
+
         world.set_line(old_pos, new_pos, this.color);
+
+        if(this.loser) {
+            this.max_time_alive = Math.max(this.max_time_alive, this.game.ticks.get_time_elapsed());
+        }
     },
     get_pos: function() {
         // Get normalized position on context
         return [Math.round(this.pos[0]), Math.round(this.pos[1])];
     },
-    is_collided: function(world) {
-        var pos = this.get_pos();
+    is_collided: function(world, pos) {
+        var pos = pos || this.get_pos();
         if(!in_boundary(pos, world.boundary)) {
             message(this.name + " fell off. lol!");
             return true;
@@ -128,12 +153,12 @@ function Game(canvas) {
 
     this.is_paused = false;
     this.is_ended = true;
+    this.ticks = null;
 
     this.loop = null;
-    this.time_elapsed = 0;
 
     var self = this;
-    this.game_loop = function() {
+    this.game_tick = function(time_delta) {
         message.render();
 
         var active_players = 0;
@@ -143,7 +168,7 @@ function Game(canvas) {
 
             self.last_player = p;
             active_players++;
-            p.move(self.world);
+            p.move(self.world, time_delta);
         }
         if(active_players==self.num_end) {
             clearInterval(self.loop);
@@ -152,13 +177,17 @@ function Game(canvas) {
             else {
                 message(self.last_player.name + " wins!").render();
                 self.last_player.num_wins++;
-                self.last_player.max_time_alive = Math.max(self.last_player.max_time_alive, self.time_elapsed);
+                self.last_player.max_time_alive = Math.max(self.last_player.max_time_alive, self.ticks.get_time_elapsed());
             }
             self.end();
         }
 
-        self.ui['timer'].text(Number(self.time_elapsed).toFixed(1));
-        self.time_elapsed += 0.036;
+        self.ui['timer'].text(Number(self.ticks.get_time_elapsed()/1000).toFixed(1));
+        self.ticks.tick();
+    }
+    this.game_loop = function() {
+        self.game_tick(new Date() - self.ticks.time_updated);
+        if(!self.is_paused) setTimeout(self.game_loop, 10);
     }
 
     // Bind controls
@@ -201,14 +230,15 @@ function Game(canvas) {
 }
 Game.prototype = {
     pause: function() {
+        clearTimeout(this.loop);
         message("Paused.").render();
         this.is_paused = true;
-        clearInterval(this.loop);
     },
     resume: function() {
         message("").render();
         this.is_paused = false;
-        this.loop = setInterval(this.game_loop, 36);
+        this.ticks.tick();
+        this.loop = setTimeout(this.game_loop, 0);
     },
     end: function() {
         this.is_ended = true;
@@ -220,10 +250,9 @@ Game.prototype = {
     reset: function() {
         for(var i=0; i<this.num_players; i++) this.players[i].reset();
         this.world.reset();
-        this.time_elapsed = 0;
 
         this.is_ended = false;
-        clearInterval(this.loop);
+        this.ticks = new FrameCounter();
         this.resume();
 
         this.ui['root'].addClass('inactive');
@@ -251,7 +280,7 @@ Game.prototype = {
             var player_ui = $('<li> \
                 <span class="color" style="background: '+p.color+'"></span> \
                 <span class="name">'+p.name+'</span> \
-                (<span class="wins">'+p.num_wins+'</span> wins, <span class="longest">'+Number(p.max_time_alive).toFixed(1)+'s</span>) \
+                (<span class="wins">'+p.num_wins+'</span> wins, <span class="longest">'+Number(p.max_time_alive/1000).toFixed(1)+'s</span>) \
                 <div class="controls"><span class="button">'+ KEY_CODES[p.controls['left']] +'</span> &harr; <span class="button">'+ KEY_CODES[p.controls['right']] +'</span></div> \
             </li>');
             t.append(player_ui);
