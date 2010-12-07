@@ -23,11 +23,17 @@
 <script src="js/jquery.disable.text.select.js"></script>
 <script src="js/util.js"></script>
 <script src="js/core.js"></script>
+
+<script src="js/Stats.js"></script>
 <script>
-    var game;
+    var game, stats;
     $(document).ready(function() {
         $("body").disableTextSelect();
         game = new Game(document.getElementById("game_canvas"));
+
+        // Dev
+        stats = new Stats();
+        $("body")[0].appendChild(stats.domElement);
     });
 </script>
 <script type="text/javascript">

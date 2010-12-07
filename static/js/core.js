@@ -1,15 +1,27 @@
-function message(s) {
-    message._buffer = s;
-    return message;
+function Map(name, src) {
+    this.name = name;
+    this.src = src;
+    this.is_loaded = false;
 }
-message._buffer = null;
-message._target = null;
-message.render = function() {
-    if(message._buffer==null) return;
-    if(!message._target) message._target = document.getElementById("messages");
-    message._target.innerHTML = message._buffer;
-    message._buffer = null;
+Map.get_collision_bitmap = function(ctx) {
 }
+Map.prototype = {
+    load: function(ctx, callback) {
+        var self = this;
+
+        this.ctx = ctx;
+        this.img = new Image();
+        this.img.onload = function() {
+            ctx.drawImage(ctx);
+            self.is_loaded = true;
+            self._compute_collision_bitmap();
+            if(callback !== undefined) callback.call(self);
+        }
+        this.img.src = this.src;
+    },
+}
+
+/*** World ***/
 
 function World(canvas) {
     this.size = [canvas.width, canvas.height];
@@ -32,7 +44,7 @@ World.prototype = {
     track_collision: function(pos1, pos2, collision_fn) {
         var ctx = this.context;
         var self = this;
-        walk_line(pos1, pos2, function(pos) {
+        iter_line(pos1, pos2, function(pos) {
             if(pos[0] == pos1[0] && pos[1] == pos1[1]) return; // Skip the first one
 
             if(self.bitmap[pos[0]][pos[1]] != 0) collision_fn(pos);
@@ -42,9 +54,11 @@ World.prototype = {
     },
     reset: function() {
         this.context.clearRect(0, 0, this.size[0], this.size[1]);
-        this.bitmap = make_grid(this.size, 0);
+        this.bitmap = make_grid(this.size, function() { return 0; });
     }
 }
+
+/*** Player ***/
 
 function Player(game, config) {
     // Constants
@@ -59,7 +73,7 @@ function Player(game, config) {
 
     // Init
     this.game = game;
-    this.color = config.color || 'rgba(255,255,255,1)';
+    this.color = config.color || 'rgb(255,255,255)';
     this.name = config.name || 'Anonymous';
     this.controls = config.controls;
 }
@@ -104,7 +118,7 @@ Player.prototype = {
         world.set_line(old_pos, new_pos, this.color);
 
         if(this.loser) {
-            this.max_time_alive = Math.max(this.max_time_alive, this.game.ticks.get_time_elapsed());
+            this.max_time_alive = Math.max(this.max_time_alive, new Date() - this.game.time_started);
         }
     },
     get_pos: function() {
@@ -137,13 +151,17 @@ Player.prototype = {
 }
 Player.CONTROL_KEYS = ['left', 'right'];
 Player.TEMPLATE_LIST = [
-    {color: 'rgba(200,20,20,0.8)', name: 'Red Player', controls: {'left': 37, 'right': 39}}, // LEFT, RIGHT
-    {color: 'rgba(80,80,240,0.8)', name: 'Blue Player', controls: {'left': 65, 'right': 83}}, // A, S
-    {color: 'rgba(80,240,80,0.8)', name: 'Green Player', controls: {'left': 75, 'right': 76}}, // K, S
-    {color: 'rgba(240,200,40,0.8)', name:  'Yellow Player', controls: {'left': 101, 'right': 103}} // NUM_4, NUM_6
+    {color: 'rgb(150,30,20)', name: 'Red Player', controls: {'left': 37, 'right': 39}}, // LEFT, RIGHT
+    {color: 'rgb(40,70,140)', name: 'Blue Player', controls: {'left': 65, 'right': 83}}, // A, S
+    {color: 'rgb(20,140,50)', name: 'Green Player', controls: {'left': 75, 'right': 76}}, // K, S
+    {color: 'rgb(160,140,30)', name:  'Yellow Player', controls: {'left': 101, 'right': 103}} // NUM_4, NUM_6
 ]
 
+
+/*** Game ***/
+
 function Game(canvas) {
+    // TODO: Put these guys into a clojure scope to reduce instance access
     this.world = new World(canvas);
     this.players = [];
 
@@ -151,14 +169,19 @@ function Game(canvas) {
     this.last_player = null;
     this.num_end = Math.min(1, this.num_players-1);
 
-    this.is_paused = false;
+    this.is_paused = true;
     this.is_ended = true;
-    this.ticks = null;
 
     this.loop = null;
+    this.time_last_tick = null;
+    this.time_started = null;
 
     var self = this;
-    this.game_tick = function(time_delta) {
+
+    var game_tick = function() {
+        var now = new Date();
+        var time_delta = now - self.time_last_tick;
+
         message.render();
         if(self.is_paused) return;
 
@@ -172,48 +195,47 @@ function Game(canvas) {
             p.move(self.world, time_delta);
         }
         if(active_players==self.num_end) {
-            clearInterval(self.loop);
-
             if(self.num_end==0) message("You died.").render();
             else {
                 message(self.last_player.name + " wins!").render();
                 self.last_player.num_wins++;
-                self.last_player.max_time_alive = Math.max(self.last_player.max_time_alive, self.ticks.get_time_elapsed());
+                self.last_player.max_time_alive = Math.max(self.last_player.max_time_alive, now - self.time_started);
             }
             self.end();
         }
 
-        self.ui['timer'].text(Number(self.ticks.get_time_elapsed()/1000).toFixed(1));
-        self.ticks.tick();
+        self.ui['timer'][0].innerHTML = Number((now - self.time_started)/1000).toFixed(1);
+        self.time_last_tick = now;
     }
     this.game_loop = function() {
-        self.game_tick(new Date() - self.ticks.time_updated);
-        if(!self.is_paused) setTimeout(self.game_loop, 40);
+        game_tick();
+        stats.update();
     }
 
     // Bind controls
-    document.onkeydown = function(e) {
+    window.onkeydown = function(e) {
         // Find which player owns the key
         if(e.which == 32) {
             if(self.is_ended) self.reset();
             else if(self.is_paused) self.resume();
             else self.pause();
+
             return;
         }
 
         var player_action = self._controls_cache[e.which];
         if(player_action) {
             player_action[0].move_buffer = player_action[1];
-            self.game_tick(new Date() - self.ticks.time_updated);
+            game_tick();
         }
     };
-    document.onkeyup = function(e) {
+    window.onkeyup = function(e) {
         if(e.which == 32) return;
 
         var player_action = self._controls_cache[e.which];
         if(player_action && player_action[0].move_buffer == player_action[1]) {
             player_action[0].move_buffer = null;
-            self.game_tick(new Date() - self.ticks.time_updated);
+            game_tick();
         }
     };
 
@@ -237,17 +259,20 @@ function Game(canvas) {
 }
 Game.prototype = {
     pause: function() {
-        clearTimeout(this.loop);
+        clearInterval(this.loop);
+
         message("Paused.").render();
         this.is_paused = true;
     },
     resume: function() {
         message("").render();
         this.is_paused = false;
-        this.ticks.tick();
-        this.loop = setTimeout(this.game_loop, 0);
+        this.time_last_tick = +new Date();
+        this.loop = setInterval(this.game_loop, 1000/30); // Max framerate
     },
     end: function() {
+        clearInterval(this.loop);
+
         this.is_ended = true;
         this.is_paused = true;
 
@@ -259,7 +284,7 @@ Game.prototype = {
         this.world.reset();
 
         this.is_ended = false;
-        this.ticks = new FrameCounter();
+        this.time_started = +new Date();
         this.resume();
 
         this.ui['root'].addClass('inactive');
