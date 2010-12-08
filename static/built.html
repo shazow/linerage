@@ -19,23 +19,10 @@
 </div>
 <div id="messages">Loading.</div>
 
-<script src="js/jquery-1.4.4.min.js"></script>
-<script src="js/jquery.disable.text.select.js"></script>
+<script src="js/extern/jquery-1.4.4.min.js"></script>
+<script src="js/extern/jquery.disable.text.select.js"></script>
 
-<script src="js/lib/Util.js"></script>
-
-<script src="js/core/Player.js"></script>
-<script src="js/core/World.js"></script>
-<script src="js/core/Map.js"></script>
-<script src="js/core/Game.js"></script>
-
-<script>
-    var game;
-    $(document).ready(function() {
-        $("body").disableTextSelect();
-        game = new Game(document.getElementById("game_canvas"));
-    });
-</script>
+<script src="js/all.js"></script>
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-407051-1']);

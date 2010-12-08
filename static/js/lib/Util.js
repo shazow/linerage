@@ -50,13 +50,14 @@ function make_grid(size, fn) {
     return grid;
 }
 
-function iter_grid(G, fn) {
-    // Given a grid G, call fn with the value and position of each element.
-    var width = G.length;
-    var height = G[0].length;
+function iter_box(box, fn) {
+    // Given a box, call fn with the position of each element.
+    var x1 = box[0], y1 = box[1], x2 = box[2], y2 = box[3];
 
-    for (var x=0; x<width; x++) {
-        for(var y=0; y<height; y++) fn(G[x][y], [x, y]);
+    for(var x=x1; x<x2; x++) {
+        for(var y=y1; y<y2; y++) {
+            fn([x, y]);
+        }
     }
 }
 
@@ -90,6 +91,10 @@ function iter_line(A, B, fn) {
             error += dx;
         }
     }
+}
+
+function flat_idx(dim, pos) {
+    return (pos[0] * dim[0] * dim[2]) + (pos[1] * dim[2]) + pos[2];
 }
 
 // Based on key codes from Google Closure
