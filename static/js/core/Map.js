@@ -5,9 +5,9 @@ function Campaign(name, maps, mode) {
     this.mode = mode || Campaign.MODES.NORMAL;
 }
 Campaign.MODES = {
-    NORMAL: 1,
-    LOOP: 2,
-    RANDOM: 3,
+    NORMAL: 0,
+    LOOP: 1,
+    RANDOM: 2,
 }
 Campaign.prototype = {
     next: function() {

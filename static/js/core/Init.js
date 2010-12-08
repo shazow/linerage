@@ -15,7 +15,7 @@ $(document).ready(function() {
             {'type': 'END', 'box': [300,200,320,220]}
         ]}),
         new Map("maps/custom/jaygoldman.png", {'objects': [
-            {'type': 'START', 'pos': [139, 418], 'angle': 0.75},
+            {'type': 'START', 'pos': [39, 418], 'angle': 0.75},
             {'type': 'END', 'box': [490,387,570,400]}
         ]}),
     ], Campaign.MODES.NORMAL);

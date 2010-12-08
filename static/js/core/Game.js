@@ -92,9 +92,8 @@ function Game(canvas) {
         if(self.campaign) {
             var m = self.campaign.next();
             if(!m) {
-                message("Game over.").render();
+                message("Winner is you.").render();
                 return;
-
             }
             self.continue_fn = function() {
                 message("Loading.").render();
