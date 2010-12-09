@@ -43,13 +43,10 @@ Player.prototype = {
 
         if(!in_boundary(new_pos, world.boundary)) {
             this.is_active = false;
-
-            $(window).trigger('die', self, Game.EVENTS.FALL_OFF)
-        }
-
-        if(this.is_active) {
+            $(window).trigger('die', [self, Game.EVENTS.FALL_OFF])
+        } else if(this.is_active) {
             world.track_collision(old_pos, new_pos, function(pos) {
-                var hit_object = world.map.is_object(pos);
+                var hit_object = world.level.is_object(pos);
                 if(hit_object) {
                     if(hit_object.type=='END') {
                         self.is_active = false;
@@ -57,12 +54,12 @@ Player.prototype = {
                     }
                 } else {
                     self.is_active = false;
-                    $(window).trigger('die', self, Game.EVENTS.COLLIDED)
+                    $(window).trigger('die', [self, Game.EVENTS.COLLIDED])
                     self.new_post = new_pos = pos;
                 }
+                return false;
             });
         }
-
         world.set_line(old_pos, new_pos, this.color);
     },
     get_pos: function() {

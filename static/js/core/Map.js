@@ -1,32 +1,32 @@
-function Campaign(name, maps, mode) {
+function LevelPack(name, levels, mode) {
     this.name = name;
-    this.maps = maps;
-    this.current_map = 0;
-    this.mode = mode || Campaign.MODES.NORMAL;
+    this.levels = levels;
+    this.current_level = 0;
+    this.mode = mode || LevelPack.MODES.NORMAL;
 }
-Campaign.MODES = {
+LevelPack.MODES = {
     NORMAL: 0,
     LOOP: 1,
-    RANDOM: 2,
+    RANDOM: 2
 }
-Campaign.prototype = {
+LevelPack.prototype = {
     next: function() {
-        if(this.current_map >= this.maps.length-1) {
-            if(this.mode==Campaign.MODES.NORMAL) return false;
-            else if(mode==Campaign.MODES.LOOP) this.current_map = 0;
+        if(this.current_level >= this.levels.length-1) {
+            if(this.mode==LevelPack.MODES.NORMAL) return false;
+            else if(mode==LevelPack.MODES.LOOP) this.current_level = 0;
         }
-        if(this.mode==Campaign.MODES.RANDOM) this.current_map = Math.floor(Math.random() * (this.maps.length - 1));
-        else this.current_map++;
-        return this.maps[this.current_map];
+        if(this.mode==LevelPack.MODES.RANDOM) this.current_level = Math.floor(Math.random() * (this.levels.length - 1));
+        else this.current_level++;
+        return this.levels[this.current_level];
     },
-    restart: function() {
-        this.current_map = 0;
-        return this.maps[this.current_map];
+    first: function() {
+        this.current_level = 0;
+        return this.levels[this.current_level];
     }
 }
 
-function Map(src, config) {
-    this.src = src;
+function Level(config) {
+    this.src = config.url;
     this.img = new Image();
 
     this.config = config;
@@ -35,7 +35,7 @@ function Map(src, config) {
     this.object_idx = {};
     this.collision_boxes = [];
 }
-Map.prototype = {
+Level.prototype = {
     _preprocess: function() {
         var ctx = this.context;
         var self = this;
@@ -94,5 +94,8 @@ Map.prototype = {
             if(in_boundary(pos, o.box)) return o;
         }
         return false;
+    },
+    has_end: function() {
+        return this.object_idx['END'] !== undefined;
     }
 }

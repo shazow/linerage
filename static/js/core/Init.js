@@ -1,28 +1,29 @@
-var game, stats, campaign;
+var game, stats, levelpack;
 $(document).ready(function() {
     $("body").disableTextSelect();
     game = new Game(document.getElementById("game_canvas"));
 
-    campaign = new Campaign("Don't worry, be happy", [
-        new Map("maps/01.png", {'objects': [
-            {'type': 'START', 'pos': [50, 300], 'angle': 0.25},
-            {'type': 'START', 'pos': [50, 320], 'angle': 0.25},
-            {'type': 'END', 'box': [550,230,570,250]}
-        ]}),
-        new Map("maps/02.png", {'objects': [
-            {'type': 'START', 'pos': [200, 25], 'angle': 0.35},
-            {'type': 'START', 'pos': [200, 35], 'angle': 0.37},
-            {'type': 'END', 'box': [300,200,320,220]}
-        ]}),
-        new Map("maps/custom/jaygoldman.png", {'objects': [
-            {'type': 'START', 'pos': [39, 418], 'angle': 0.75},
-            {'type': 'END', 'box': [490,387,570,400]}
-        ]}),
-    ], Campaign.MODES.NORMAL);
+    var levelpacks = [];
+    $.getJSON("levels/index.json", function(r) {
+        foo = r;
+        for(var i=0, stop=r.packs.length; i<stop; i++) {
+            var pack = r.packs[i];
 
-    game.campaign = campaign;
-    game.world.load_map(campaign.maps[0], function() {
-        game.is_ready = true;
-        message("Ready? Press <em>Space</em> to start.").render();
+            // FIXME: Let levelpacks load dynamically later?
+            if(!pack.manifest) continue;
+
+            var levels = [];
+            for(var j=0, jstop=pack.manifest.levels.length; j<jstop; j++) {
+                levels.push(new Level(pack.manifest.levels[j]));
+            }
+            levelpacks.push(new LevelPack(r.name, levels));
+        }
+
+        game.levelpacks = levelpacks;
+        game.current_levelpack = levelpacks[0];
+        game.world.load_level(game.current_levelpack.first(), function() {
+            game.is_ready = true;
+            message("Ready? Press <em>Space</em> to start.").render();
+        });
     });
 });

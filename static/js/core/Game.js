@@ -15,7 +15,7 @@ function Game(canvas) {
     this.time_last_tick = null;
     this.time_started = null;
 
-    this.campaign = null;
+    this.levelpack = null;
 
     var self = this;
 
@@ -79,6 +79,8 @@ function Game(canvas) {
     this.add_player();
 
     $(window).bind('win', function(e, player, how) {
+        e.stopPropagation();
+
         self.end();
         player.num_wins++;
         player.max_time_alive = Math.max(player.max_time_alive, self.time_last_tick - self.time_started);
@@ -89,46 +91,53 @@ function Game(canvas) {
             message(player.name + " wins!").render();
         }
 
-        if(self.campaign) {
-            var m = self.campaign.next();
+        if(self.levelpack) {
+            var m = self.levelpack.next();
             if(!m) {
                 message("Winner is you.").render();
-                return;
+                return false;
             }
             self.continue_fn = function() {
                 message("Loading.").render();
-                self.world.load_map(m, function() {
+                self.world.load_level(m, function() {
                     self.is_ready = true;
                     message("Ready?").render();
                     self.continue_fn = self.reset;
                 });
             }
         }
+        return false;
     }).bind('die', function(e, player, how) {
-        player.is_active = false;
+        e.preventDefault();
+        e.stopPropagation();
         self.num_active--;
+        player.is_active = false;
 
         player.max_time_alive = Math.max(player.max_time_alive, self.time_last_tick - self.time_started);
         player.num_deaths++;
 
         if(self.num_active<=self.num_end) {
-            if(self.num_end==0) {
-                $(window).trigger('lose', [player, how]);
-                return;
-            }
-            else if(how==Game.EVENTS.FALL_OFF) {
-                message(player.name + " fell off. lol!").render();
-            } else if(how==Game.EVENTS.COLLIDED) {
-                message(player.name + " collided.").render();
-            }
+            $(window).trigger('lose', [player, how]);
+            return false;
         }
+        if(how==Game.EVENTS.FALL_OFF) {
+            message(player.name + " fell off. lol!").render();
+        } else if(how==Game.EVENTS.COLLIDED) {
+            message(player.name + " collided.").render();
+        } else {
+            message(player.name + " died.").render();
+        }
+        return false;
     }).bind('lose', function(e, player, how) {
-        if(how==Game.EVENTS.COLLIDED || how==Game.EVENTS.FALL_OFF) {
+        if(self.num_players > 1) {
+            message("Complete failure.").render();
+        } else if(how==Game.EVENTS.COLLIDED || how==Game.EVENTS.FALL_OFF) {
             message("You died.").render();
         } else {
             message("You lose.").render();
         }
         self.end();
+        return false;
     });
 }
 Game.EVENTS = {
@@ -164,7 +173,7 @@ Game.prototype = {
     },
     reset: function() {
         if(!this.is_ready) return;
-        var object_idx = this.world.map.object_idx;
+        var object_idx = this.world.level.object_idx;
         for(var i=0; i<this.num_players; i++) {
             var start_obj = object_idx['START'][i];
             this.players[i].reset(start_obj.pos, start_obj.angle);
@@ -176,6 +185,8 @@ Game.prototype = {
         this.time_started = +new Date();
         this.ui['root'].addClass('inactive');
 
+        this._refresh_game_conditions();
+
         var self = this;
         this.world.reset(function() {
             self.resume();
@@ -185,15 +196,20 @@ Game.prototype = {
         if(!this.is_ended || this.num_players >= 4) return;
         this.players.push(new Player(this, Player.TEMPLATE_LIST[this.num_players]));
         this.num_players = this.players.length;
-        this.num_end = Math.min(1, this.num_players-1);
         this._refresh_controls_cache();
     },
     remove_player: function() {
         if(!this.is_ended || this.num_players <= 1) return;
         this.players.pop();
         this.num_players = this.players.length;
-        this.num_end = Math.min(1, this.num_players-1);
         this._refresh_controls_cache();
+    },
+    _refresh_game_conditions: function() {
+        if(this.world.level.has_end()) {
+            this.num_end = 0;
+        } else {
+            this.num_end = Math.min(1, this.num_players-1);
+        }
     },
     draw_scoreboard: function() {
         var self = this;

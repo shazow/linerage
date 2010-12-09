@@ -1,0 +1,27 @@
+{"packs": [
+    {"name": "Easy", "manifest": 
+        {"levels": [
+            {"name": "Pink",
+                "url": "levels/easy/pink.png",
+                "description": "",
+                "objects": [
+                    {"type": "START", "pos": [200, 25], "angle": 0.35},
+                    {"type": "START", "pos": [200, 35], "angle": 0.37},
+                    {"type": "END", "box": [300, 200, 320, 220]}
+                ]
+            },
+            {"name": "Blue",
+                "url": "levels/easy/blue.png",
+                "description": "",
+                "objects": [
+                    {"type": "START", "pos": [50, 300], "angle": 0.25},
+                    {"type": "START", "pos": [50, 320], "angle": 0.25},
+                    {"type": "END", "box": [550,230,570,250]}
+                ]
+            }
+        ]}
+    },
+    {"name": "Medium", "manifest_url": "medium/manifest.json"},
+    {"name": "Hard", "manifest_url": "hard/manifest.json"},
+    {"name": "Community", "manifest_url": "hard/manifest.json"}
+]}

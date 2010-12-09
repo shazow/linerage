@@ -1,0 +1,10 @@
+{"levels": [
+    {"name": "The Jay Goldman Experience",
+        "url": "jaygoldman.png",
+        "description": "Brought to you by the heroic @jaygoldman.",
+        "objects": [
+            {"type": "START", "pos": [39, 418], "angle": 0.9},
+            {"type": "END", "box": [490,387,570,400]}
+        ]
+    },
+]}

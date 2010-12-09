@@ -81,9 +81,12 @@ function iter_line(A, B, fn) {
     var error = dx / 2, ystep = -1;
     if(y0 < y1) ystep = 1;
 
+    var r;
     for(var x=x0, y=y0, stop=x1; x<=stop; x++) {
-        if(steep) fn([y,x])
-        else fn([x,y]);
+        if(steep) r = fn([y,x])
+        else r = fn([x,y]);
+
+        if(r==false) return false;
 
         error -= dy;
         if(error < 0) {
