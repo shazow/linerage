@@ -15,23 +15,29 @@ function Game(canvas) {
     this.time_last_tick = null;
     this.time_started = null;
 
-    this.levelpack = null;
+    this.current_levelpack = null;
 
     var self = this;
+    var tick_num = 0;
 
     var game_tick = function() {
-        var now = new Date();
+        var now = +new Date();
         var time_delta = now - self.time_last_tick;
 
-        message.render();
         if(self.is_paused) return;
 
         for(var i=0; i<self.num_players; i++) {
             var p = self.players[i];
             if(p.is_active) p.move(self.world, time_delta);
         }
-        self.ui['timer'][0].innerHTML = Number((now - self.time_started)/1000).toFixed(1);
+
+        // Execute the rest half as frequently
+        if(tick_num % 2 == 0) {
+            self.world.level.render_entities(now);
+            self.ui['timer'][0].innerHTML = Number((now - self.time_started)/1000).toFixed(1);
+        }
         self.time_last_tick = now;
+        tick_num++;
     }
     this.game_loop = function() {
         game_tick();
@@ -86,22 +92,22 @@ function Game(canvas) {
         player.max_time_alive = Math.max(player.max_time_alive, self.time_last_tick - self.time_started);
 
         if(how==Game.EVENTS.ESCAPED) {
-            message(player.name + " escaped successfully!").render();
+            message(player.name + " escaped successfully!");
         } else {
-            message(player.name + " wins!").render();
+            message(player.name + " wins!");
         }
 
-        if(self.levelpack) {
-            var m = self.levelpack.next();
+        if(self.current_levelpack) {
+            var m = self.current_levelpack.next();
             if(!m) {
-                message("Winner is you.").render();
+                message("Winner is you.");
                 return false;
             }
             self.continue_fn = function() {
-                message("Loading.").render();
+                message("Loading.");
                 self.world.load_level(m, function() {
                     self.is_ready = true;
-                    message("Ready?").render();
+                    message("Ready?");
                     self.continue_fn = self.reset;
                 });
             }
@@ -121,20 +127,20 @@ function Game(canvas) {
             return false;
         }
         if(how==Game.EVENTS.FALL_OFF) {
-            message(player.name + " fell off. lol!").render();
+            message(player.name + " fell off. lol!");
         } else if(how==Game.EVENTS.COLLIDED) {
-            message(player.name + " collided.").render();
+            message(player.name + " collided.");
         } else {
-            message(player.name + " died.").render();
+            message(player.name + " died.");
         }
         return false;
     }).bind('lose', function(e, player, how) {
         if(self.num_players > 1) {
-            message("Complete failure.").render();
+            message("Complete failure.");
         } else if(how==Game.EVENTS.COLLIDED || how==Game.EVENTS.FALL_OFF) {
-            message("You died.").render();
+            message("You died.");
         } else {
-            message("You lose.").render();
+            message("You lose.");
         }
         self.end();
         return false;
@@ -149,12 +155,12 @@ Game.prototype = {
     pause: function() {
         clearInterval(this.loop);
 
-        message("Paused.").render();
+        message("Paused.");
         this.is_paused = true;
         this.continue_fn = this.resume;
     },
     resume: function() {
-        message("").render();
+        message("");
         this.is_paused = false;
         this.continue_fn = this.pause;
 
@@ -173,16 +179,16 @@ Game.prototype = {
     },
     reset: function() {
         if(!this.is_ready) return;
-        var object_idx = this.world.level.object_idx;
+        var starts = this.world.level.get_starts();
         for(var i=0; i<this.num_players; i++) {
-            var start_obj = object_idx['START'][i];
+            var start_obj = starts[i];
             this.players[i].reset(start_obj.pos, start_obj.angle);
         }
+        this.time_started = +new Date();
         this.num_active = this.num_players;
         this.is_ended = false;
         this.continue_fn = this.pause;
 
-        this.time_started = +new Date();
         this.ui['root'].addClass('inactive');
 
         this._refresh_game_conditions();
@@ -190,6 +196,7 @@ Game.prototype = {
         var self = this;
         this.world.reset(function() {
             self.resume();
+            self.world.level.render_entities();
         });
     },
     add_player: function() {

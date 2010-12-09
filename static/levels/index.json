@@ -1,19 +1,38 @@
 {"packs": [
-    {"name": "Easy", "manifest": 
+    {"name": "Easy", "manifest":
         {"levels": [
             {"name": "Pink",
                 "url": "levels/easy/pink.png",
                 "description": "",
-                "objects": [
+                "entities": [
                     {"type": "START", "pos": [200, 25], "angle": 0.35},
                     {"type": "START", "pos": [200, 35], "angle": 0.37},
-                    {"type": "END", "box": [300, 200, 320, 220]}
+                    {"type": "END", "box": [300, 200, 320, 220]},
+                    {"type": "BONUS", "box": [250,60,260,70]}
+                ]
+            },
+            {"name": "Orange",
+                "url": "levels/easy/orange.png",
+                "description": "",
+                "entities": [
+                    {"type": "START", "pos": [50, 375], "angle": 1.6},
+                    {"type": "START", "pos": [60, 370], "angle": 1.8},
+                    {"type": "END", "box": [600,350,620,370]}
+                ]
+            },
+            {"name": "Green",
+                "url": "levels/easy/green.png",
+                "description": "",
+                "entities": [
+                    {"type": "START", "pos": [25, 25], "angle": 0.30},
+                    {"type": "START", "pos": [20, 30], "angle": 0.31},
+                    {"type": "END", "box": [375,200,395,220]}
                 ]
             },
             {"name": "Blue",
-                "url": "levels/easy/blue.png",
+                "url": "levels/easy/blue.png?1",
                 "description": "",
-                "objects": [
+                "entities": [
                     {"type": "START", "pos": [50, 300], "angle": 0.25},
                     {"type": "START", "pos": [50, 320], "angle": 0.25},
                     {"type": "END", "box": [550,230,570,250]}
@@ -23,5 +42,16 @@
     },
     {"name": "Medium", "manifest_url": "medium/manifest.json"},
     {"name": "Hard", "manifest_url": "hard/manifest.json"},
-    {"name": "Community", "manifest_url": "hard/manifest.json"}
+    {"name": "Community", "manifest":
+        {"levels": [
+            {"name": "The Jay Goldman Experience",
+                "url": "jaygoldman.png",
+                "description": "Brought to you by the heroic @jaygoldman.",
+                "entities": [
+                    {"type": "START", "pos": [39, 418], "angle": 0.9},
+                    {"type": "END", "box": [490,387,570,400]}
+                ]
+            }
+        ]}
+    }
 ]}

@@ -20,7 +20,7 @@ Player.prototype = {
     reset: function(pos, angle) {
         this.is_active = true;
         this.pos = pos || [100 + Math.random() * 440, 100 + Math.random() * 280];
-        this.angle = angle || Math.random() * 2;
+        this.angle = angle === undefined ? Math.random() * 2 : angle;
         this.move_buffer = null;
     },
     move: function(world, time_delta) {
@@ -46,12 +46,10 @@ Player.prototype = {
             $(window).trigger('die', [self, Game.EVENTS.FALL_OFF])
         } else if(this.is_active) {
             world.track_collision(old_pos, new_pos, function(pos) {
-                var hit_object = world.level.is_object(pos);
-                if(hit_object) {
-                    if(hit_object.type=='END') {
-                        self.is_active = false;
-                        $(window).trigger('win', [self, Game.EVENTS.ESCAPED]);
-                    }
+
+                var hit_entity = world.level.is_entity(pos);
+                if(hit_entity) {
+                    hit_entity.do_collision(self);
                 } else {
                     self.is_active = false;
                     $(window).trigger('die', [self, Game.EVENTS.COLLIDED])

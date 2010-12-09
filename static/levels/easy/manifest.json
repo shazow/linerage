@@ -2,7 +2,7 @@
     {"name": "Pink",
         "url": "pink.png",
         "description": "",
-        "objects": [
+        "entities": [
             {"type": "START", "pos": [200, 25], "angle": 0.35},
             {"type": "START", "pos": [200, 35], "angle": 0.37},
             {"type": "END", "box": [300, 200, 320, 220]}
@@ -11,7 +11,7 @@
     {"name": "Blue",
         "url": "blue.png",
         "description": "",
-        "objects": [
+        "entities": [
             {'type': 'START', 'pos': [50, 300], 'angle': 0.25},
             {'type': 'START', 'pos': [50, 320], 'angle': 0.25},
             {'type': 'END', 'box': [550,230,570,250]}

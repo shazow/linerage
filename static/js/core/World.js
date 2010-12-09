@@ -41,17 +41,11 @@ World.prototype = {
         this.bitmap = make_grid(this.size, function() { return 0; });
         this.load_level(this.level, callback);
     },
-    _draw_escape: function(box) {
-        var ctx = this.context;
-        ctx.fillStyle = 'rgb(255,255,255)';
-        ctx.fillRect(box[0], box[1], box[2]-box[0], box[3]-box[1]);
-    },
     load_level: function(level, callback) {
         this.level = level;
         var self = this;
 
         level.load(this.context, this.size, function() {
-            if(level.object_idx['END']) self._draw_escape(level.object_idx['END'][0].box);
             if(callback!==undefined) callback.call(this);
         });
 

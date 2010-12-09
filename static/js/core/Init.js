@@ -23,7 +23,7 @@ $(document).ready(function() {
         game.current_levelpack = levelpacks[0];
         game.world.load_level(game.current_levelpack.first(), function() {
             game.is_ready = true;
-            message("Ready? Press <em>Space</em> to start.").render();
+            message("Ready? Press <em>Space</em> to start.");
         });
     });
 });
