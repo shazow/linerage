@@ -1,3 +1,10 @@
+/*
+
+There's a good amount of repetitive code in this module for the sake of execution optimization.
+
+*/
+
+
 var CircleEntity = function(pos, radius) {
     this.pos = pos;
     this.radius = radius;
@@ -28,7 +35,7 @@ EntityCollider.prototype = {
         for(var i=boxes.length; i>=0; i--) {
             if(entity==boxes[i]) {
                 boxes.splice(i, 1);
-                return;
+                return true;
             }
         }
 
@@ -36,17 +43,17 @@ EntityCollider.prototype = {
         for(var i=circles.length; i>=0; i--) {
             if(entity==circles[i]) {
                 circles.splice(i, 1);
-                return;
+                return true;
             }
         }
 
-    }
+    },
     check_collisions: function(pos, callback) {
         // Calls callback on collision with position from entity context.
 
         // Check boxes
         var boxes = this.boxes;
-        for(var i=boxes.length; i>=0; i--) {
+        for(var i=boxes.length-1; i>=0; i--) {
             var entity = boxes[i];
             if(!in_boundary(pos, entity.box)) continue;
 
@@ -55,12 +62,14 @@ EntityCollider.prototype = {
         }
 
         // Check circles
-        // TODO: ...
-        /*
         var circles = this.circles;
-        for(var i=circles.length; i>=0; i--) {
+        for(var i=circles.length-1; i>=0; i--) {
+            var entity = circles[i];
+            if(!in_radius(pos, entity.pos, entity.radius)) continue;
+
+            var r = callback.call(entity, pos);
+            if(!r) return;
         }
-        */
     }
 }
 

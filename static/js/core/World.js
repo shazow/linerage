@@ -1,17 +1,20 @@
-function World(canvas) {
-    this.size = [canvas.width, canvas.height];
+function World(level_canvas, entity_canvas) {
+    this.size = [level_canvas.width, level_canvas.height];
     this.boundary = [0, 0, this.size[0]-1, this.size[1]-1];
     this.bitmap = null;
 
     this.level = null;
 
-    this.canvas = canvas;
-    this.context = this.canvas.getContext("2d");
-    this.context.lineWidth = 1.5;
+    this.level_canvas = level_canvas;
+    this.entity_canvas = entity_canvas;
+
+    this.level_context = level_canvas.getContext("2d");
+    this.entity_context = entity_canvas.getContext("2d");
+    this.entity_context.lineWidth = 1.5;
 }
 World.prototype = {
     set_line: function(pos1, pos2, color) {
-        var ctx = this.context;
+        var ctx = this.entity_context;
         ctx.strokeStyle = color;
         ctx.beginPath();
         ctx.moveTo(pos1[0], pos1[1]);
@@ -19,7 +22,6 @@ World.prototype = {
         ctx.stroke();
     },
     track_collision: function(pos1, pos2, collision_fn) {
-        var ctx = this.context;
         var self = this;
         iter_line(pos1, pos2, function(pos) {
             if(pos[0] == pos1[0] && pos[1] == pos1[1]) return true; // Skip the first one
@@ -45,7 +47,7 @@ World.prototype = {
         this.level = level;
         var self = this;
 
-        level.load(this.context, this.size, function() {
+        level.load(this.level_context, this.size, function() {
             if(callback!==undefined) callback.call(this);
         });
 

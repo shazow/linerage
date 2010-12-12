@@ -1,6 +1,6 @@
-function Game(canvas) {
+function Game(static_canvas, dynamic_canvas) {
     // TODO: Put these guys into a clojure scope to reduce instance access
-    this.world = new World(canvas);
+    this.world = new World(static_canvas, dynamic_canvas);
     this.players = [];
 
     this.num_players = this.players.length;

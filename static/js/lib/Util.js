@@ -5,6 +5,11 @@ function in_boundary(pos, box) {
            pos[1] <= box[3];   // y2
 }
 
+function in_radius(pos, circle_pos, circle_radius) {
+    var dx = pos[0] - circle_pos[0], dy = pos[1] - circle_pos[1];
+    return circle_radius*circle_radius < dx*dx + dy*dy;
+}
+
 function bounding_square(pos, size) {
     /* Given pos [x1, y1] with size scalar,
  [x1, y1, x2: "   * Returns boundary", y2] */

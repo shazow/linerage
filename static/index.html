@@ -15,7 +15,10 @@
 <div id="intro">End of the Line. Don't hit things.</div>
 <div id="game">
     <nav></nav>
-    <canvas id="game_canvas" width="640" height="480" style="background: #000;"></canvas>
+    <div style="width: 640px; height: 480px;">
+        <canvas id="dynamic_canvas" width="640" height="480" style="position: absolute; z-index: 2;"></canvas>
+        <canvas id="static_canvas" width="640" height="480" style="position: absolute; background: #000; z-index: 1;"></canvas>
+    </div>
 </div>
 <div id="messages">Loading.</div>
 
@@ -24,6 +27,7 @@
 
 <script src="js/lib/Stats.js"></script>
 <script src="js/lib/Util.js"></script>
+<script src="js/lib/Collision.js"></script>
 
 <script src="js/core/Player.js"></script>
 <script src="js/core/World.js"></script>
