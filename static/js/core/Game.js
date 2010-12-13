@@ -1,8 +1,12 @@
 function Game(static_canvas, dynamic_canvas) {
     // TODO: Put these guys into a clojure scope to reduce instance access
-    this.world = new World(static_canvas, dynamic_canvas);
-    this.players = [];
+    this.static_context = static_canvas.getContext("2d");
+    this.dynamic_context = dynamic_canvas.getContext("2d");
+    this.dynamic_context.lineWidth = 1.5;
 
+    this.size = [static_canvas.width, static_canvas.height];
+
+    this.players = [];
     this.num_players = this.players.length;
     this.num_active = this.num_players;
     this.num_end = Math.min(1, this.num_players-1);
@@ -15,7 +19,8 @@ function Game(static_canvas, dynamic_canvas) {
     this.time_last_tick = null;
     this.time_started = null;
 
-    this.current_levelpack = null;
+    this.levelpack = null;
+    this.level = null;
 
     var self = this;
     var tick_num = 0;
@@ -28,12 +33,12 @@ function Game(static_canvas, dynamic_canvas) {
 
         for(var i=0; i<self.num_players; i++) {
             var p = self.players[i];
-            if(p.is_active) p.move(self.world, time_delta);
+            if(p.is_active) p.move(self.level, time_delta);
         }
 
         // Execute the rest half as frequently
         if(tick_num % 2 == 0) {
-            self.world.level.render_entities(now);
+            self.level.render_entities(now);
             self.ui['timer'][0].innerHTML = Number((now - self.time_started)/1000).toFixed(1);
         }
         self.time_last_tick = now;
@@ -91,21 +96,21 @@ function Game(static_canvas, dynamic_canvas) {
         player.num_wins++;
         player.max_time_alive = Math.max(player.max_time_alive, self.time_last_tick - self.time_started);
 
-        if(how==Game.EVENTS.ESCAPED) {
+        if(how==Player.EVENTS.ESCAPED) {
             message(player.name + " escaped successfully!");
         } else {
             message(player.name + " wins!");
         }
 
-        if(self.current_levelpack) {
-            var m = self.current_levelpack.next();
+        if(self.levelpack) {
+            var m = self.levelpack.next();
             if(!m) {
                 message("Winner is you.");
                 return false;
             }
             self.continue_fn = function() {
                 message("Loading.");
-                self.world.load_level(m, function() {
+                self.load_level(m, function() {
                     self.is_ready = true;
                     message("Ready?");
                     self.continue_fn = self.reset;
@@ -126,9 +131,9 @@ function Game(static_canvas, dynamic_canvas) {
             $(window).trigger('lose', [player, how]);
             return false;
         }
-        if(how==Game.EVENTS.FALL_OFF) {
+        if(how==Player.EVENTS.FALL_OFF) {
             message(player.name + " fell off. lol!");
-        } else if(how==Game.EVENTS.COLLIDED) {
+        } else if(how==Player.EVENTS.COLLIDED) {
             message(player.name + " collided.");
         } else {
             message(player.name + " died.");
@@ -137,7 +142,7 @@ function Game(static_canvas, dynamic_canvas) {
     }).bind('lose', function(e, player, how) {
         if(self.num_players > 1) {
             message("Complete failure.");
-        } else if(how==Game.EVENTS.COLLIDED || how==Game.EVENTS.FALL_OFF) {
+        } else if(how==Player.EVENTS.COLLIDED || how==Player.EVENTS.FALL_OFF) {
             message("You died.");
         } else {
             message("You lose.");
@@ -145,11 +150,6 @@ function Game(static_canvas, dynamic_canvas) {
         self.end();
         return false;
     });
-}
-Game.EVENTS = {
-    FALL_OFF: 1,
-    COLLIDED: 2,
-    ESCAPED: 3
 }
 Game.prototype = {
     pause: function() {
@@ -179,7 +179,7 @@ Game.prototype = {
     },
     reset: function() {
         if(!this.is_ready) return;
-        var starts = this.world.level.get_starts();
+        var starts = this.level.start_positions;
         for(var i=0; i<this.num_players; i++) {
             var start_obj = starts[i];
             this.players[i].reset(start_obj.pos, start_obj.angle);
@@ -192,12 +192,8 @@ Game.prototype = {
         this.ui['root'].addClass('inactive');
 
         this._refresh_game_conditions();
-
-        var self = this;
-        this.world.reset(function() {
-            self.resume();
-            self.world.level.render_entities();
-        });
+        this.level.reset();
+        this.resume();
     },
     add_player: function() {
         if(!this.is_ended || this.num_players >= 4) return;
@@ -212,11 +208,18 @@ Game.prototype = {
         this._refresh_controls_cache();
     },
     _refresh_game_conditions: function() {
-        if(this.world.level.has_end()) {
+        if(!this.level.is_deathmatch) {
             this.num_end = 0;
         } else {
             this.num_end = Math.min(1, this.num_players-1);
         }
+    },
+    load_level: function(level, callback) {
+        this.level = level;
+        level.load(this.static_context, this.size, function() {
+            if(callback!==undefined) callback.call(this);
+        });
+
     },
     draw_scoreboard: function() {
         var self = this;

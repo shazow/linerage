@@ -1,9 +1,8 @@
-var game, stats, levelpack;
+var game, stats, levelpacks = [];
 $(document).ready(function() {
     $("body").disableTextSelect();
     game = new Game(document.getElementById("static_canvas"), document.getElementById("dynamic_canvas"));
 
-    var levelpacks = [];
     $.getJSON("levels/index.json", function(r) {
         foo = r;
         for(var i=0, stop=r.packs.length; i<stop; i++) {
@@ -19,9 +18,8 @@ $(document).ready(function() {
             levelpacks.push(new LevelPack(r.name, levels));
         }
 
-        game.levelpacks = levelpacks;
-        game.current_levelpack = levelpacks[0];
-        game.world.load_level(game.current_levelpack.first(), function() {
+        game.levelpack = levelpacks[0];
+        game.load_level(game.levelpack.first(), function() {
             game.is_ready = true;
             message("Ready? Press <em>Space</em> to start.");
         });

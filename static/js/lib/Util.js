@@ -56,6 +56,17 @@ function make_grid(size, fn) {
     return grid;
 }
 
+function make_grid_fast(size, value) {
+    var grid = [];
+    var w = size[0], h = size[1];
+    for (var x=w; x>=0; x--) {
+        var row = [];
+        for(var y=h; y>=0; y--) row.push(value);
+        grid.push(row);
+    }
+    return grid;
+}
+
 function iter_box(box, fn) {
     // Given a box, call fn with the position of each element.
     var x1 = box[0], y1 = box[1], x2 = box[2], y2 = box[3];

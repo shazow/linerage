@@ -17,77 +17,52 @@ var BoxEntity = function(box) {
 }
 
 
-
-var EntityCollider = function() {
-    this.circles = [];
-    this.boxes = [];
+var EntityAnimator = function() {
+    this.reset();
+    this.time_drawn = +new Date();
 }
-EntityCollider.prototype = {
+EntityAnimator.prototype = {
+    reset: function() {
+        this.entities = [];
+    },
     add: function(entity) {
-        if(entity.box) {
-            this.boxes.push(entity);
-        } else if(entity.pos && entity.radius) {
-            this.circles.push(entity);
-        }
+        this.entities.push(entity);
     },
     remove: function(entity) {
-        var boxes = this.boxes;
-        for(var i=boxes.length; i>=0; i--) {
-            if(entity==boxes[i]) {
-                boxes.splice(i, 1);
+        for(var entities=this.entities, i=entities.length-1; i>=0; i--) {
+            if(entity==entities[i]) {
+                entities.splice(i, 1);
                 return true;
             }
         }
-
-        var circles = this.circles;
-        for(var i=circles.length; i>=0; i--) {
-            if(entity==circles[i]) {
-                circles.splice(i, 1);
-                return true;
-            }
-        }
-
     },
-    check_collisions: function(pos, callback) {
-        // Calls callback on collision with position from entity context.
+    draw: function(ctx) {
+        // TODO: Pass `now` in?
+        var now = +new Date();
 
-        // Check boxes
-        var boxes = this.boxes;
-        for(var i=boxes.length-1; i>=0; i--) {
-            var entity = boxes[i];
-            if(!in_boundary(pos, entity.box)) continue;
+        for(var entities=this.entities, i=entities.length-1; i>=0; i--) {
+            var entity = entities[i];
 
-            var r = callback.call(entity, pos);
-            if(!r) return;
+            // TODO: Optimize this by keeping a sorted list of entities based
+            // on their time to draw.
+            if(now - entity.time_drawn < entity.draw_rate) continue;
+
+            entity.draw(ctx);
         }
 
-        // Check circles
-        var circles = this.circles;
-        for(var i=circles.length-1; i>=0; i--) {
-            var entity = circles[i];
-            if(!in_radius(pos, entity.pos, entity.radius)) continue;
-
-            var r = callback.call(entity, pos);
-            if(!r) return;
-        }
+        this.time_drawn = now;
     }
 }
+
 
 
 var PositionCollider = function(size) {
     this.size = size;
-
-    var grid = [];
-
-    var w = size[0], h = size[1];
-    for (var x=w; x>=0; x--) {
-        var row = [];
-        for(var y=h; y>=0; y--) row.push(0);
-        grid.push(row);
-    }
-    this.grid = grid;
 }
 PositionCollider.prototype = {
+    init: function() {
+        this.grid = make_grid_fast(this.size, 0);
+    },
     set: function(pos, value) {
         this.grid[pos[0]][pos[1]] = value;
     },
@@ -102,7 +77,7 @@ PositionCollider.prototype = {
         }
     },
     set_from_canvas: function(ctx, box) {
-        var x1 = box[0], y1 = box[1], x2 = box[2], x3 = box[3];
+        var x1 = box[0], y1 = box[1], x2 = box[2], y2 = box[3];
         var dx = x2-x1, dy = y2-y1;
 
         var data = ctx.getImageData(x1, y2, dx, dy).data;
@@ -119,3 +94,61 @@ PositionCollider.prototype = {
         return this.grid[pos[0]][pos[1]] > 0;
     }
 }
+
+
+
+var EntityCollider = function(size) {
+    this.size = size;
+}
+EntityCollider.prototype = {
+    init: function() {
+        this.circles = [];
+        this.boxes = [];
+        this.collider = new PositionCollider(this.size);
+    },
+    add: function(entity) {
+        // XXX: Add entity to this.collider
+        if(entity.box) {
+            this.boxes.push(entity);
+        } else if(entity.pos && entity.radius) {
+            this.circles.push(entity);
+        }
+    },
+    remove: function(entity) {
+        var boxes = this.boxes;
+        for(var i=boxes.length-1; i>=0; i--) {
+            if(entity==boxes[i]) {
+                boxes.splice(i, 1);
+                return true;
+            }
+        }
+
+        var circles = this.circles;
+        for(var i=circles.length-1; i>=0; i--) {
+            if(entity==circles[i]) {
+                circles.splice(i, 1);
+                return true;
+            }
+        }
+
+    },
+    get: function(pos) {
+        if(!this.collider.get(pos)) return;
+        // FIXME: Should this be callback-based to handle multiple collisions?
+
+        // Check boxes
+        var boxes = this.boxes;
+        for(var i=boxes.length-1; i>=0; i--) {
+            var entity = boxes[i];
+            if(in_boundary(pos, entity.box)) return entity;
+        }
+
+        // Check circles
+        var circles = this.circles;
+        for(var i=circles.length-1; i>=0; i--) {
+            var entity = circles[i];
+            if(in_radius(pos, entity.pos, entity.radius)) return entity;
+        }
+    }
+}
+
