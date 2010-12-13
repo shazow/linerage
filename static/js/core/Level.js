@@ -15,19 +15,20 @@ Level.prototype = {
         this.is_loaded = false;
         this.state = null;
     },
-    load: function(ctx, size, callback) {
+    load: function(contexts, size, callback) {
         this.size = size;
 
         if(Level.last_loaded && Level.last_loaded != this) Level.last_loaded.unload();
 
         var self = this;
         var process = function() {
+            var ctx = contexts.level;
             ctx.clearRect(0, 0, size[0], size[1]);
             ctx.drawImage(self.img, 0, 0);
 
             if(!self.is_loaded) {
                 self.is_loaded = true;
-                self.state = new LevelState(size, self.config.entities, ctx);
+                self.state = new LevelState(size, self.config.entities, contexts);
             }
 
             if(callback!==undefined) callback();
@@ -43,16 +44,16 @@ Level.prototype = {
         Level.last_loaded = self;
     },
     is_collision: function(pos) {
-        if(!this.state.level_collider.get(pos)) return false;
+        if(this.state.level_collider.get(pos)) return true;
 
-        return this.state.entity_collider.get(pos) || true;
+        return this.state.entity_collider.get(pos);
     },
 }
 
-function LevelState(size, entities, context) {
+function LevelState(size, entities, contexts) {
     this.size = size;
     this.entities = entities;
-    this.context = context;
+    this.contexts = contexts;
 
     // TODO: Should these all compound each other?
     this.entity_animator = new EntityAnimator();
@@ -60,13 +61,15 @@ function LevelState(size, entities, context) {
     this.level_collider = new PositionCollider(this.size);
 
     this.level_collider.init();
-    this.level_collider.set_from_canvas(context, [0, 0, this.size[0], this.size[1]]);
+    this.level_collider.set_from_canvas(contexts.level, [0, 0, this.size[0], this.size[1]]);
 
     this.reset();
 }
 LevelState.prototype = {
     load_entities: function() {
         var entities = this.entities;
+        var ctx = this.contexts.entities;
+
         for(var i=entities.length-1; i>=0; i--) {
             var e = entities[i];
 
@@ -76,14 +79,21 @@ LevelState.prototype = {
                     break;
                 case 'END':
                     this.is_deathmatch = false;
-                    this.entity_collider.add(new EndEntity(e.box));
-                    // XXX: Add to animator
-                    // XXX: Add to position collider
+
+                    var entity = new EndEntity(e.box);
+                    this.entity_collider.add(entity);
+                    entity.draw(ctx);
+                    this.entity_animator.add(entity);
+                    this.entity_collider.collider.set_from_canvas(ctx, entity.box);
+
                     break;
                 case 'BONUS':
-                    this.entity_collider.add(new BonusEntity(e.box));
-                    // XXX: Add to animator;
-                    // XXX: Add to position collider
+                    var entity = new BonusEntity(e.box);
+
+                    this.entity_collider.add(entity);
+                    entity.draw(ctx);
+                    this.entity_collider.collider.set_from_canvas(ctx, entity.box);
+
                     break;
             }
         }
@@ -92,6 +102,9 @@ LevelState.prototype = {
         this.start_positions = [];
         this.is_deathmatch = true;
         this.score = 0;
+
+        var ctx = this.contexts.entities;
+        ctx.clearRect(0, 0, this.size[0], this.size[1]);
 
         this.entity_collider.init();
         this.entity_animator.init();

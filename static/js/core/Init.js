@@ -1,7 +1,10 @@
 var game, stats, levelpacks = [];
 $(document).ready(function() {
     $("body").disableTextSelect();
-    game = new Game(document.getElementById("static_canvas"), document.getElementById("dynamic_canvas"));
+    game = new Game({
+        'static': document.getElementById("static_canvas"),
+        'dynamic': document.getElementById("dynamic_canvas")
+    });
 
     $.getJSON("levels/index.json", function(r) {
         foo = r;

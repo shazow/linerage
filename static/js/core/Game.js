@@ -1,10 +1,12 @@
-function Game(static_canvas, dynamic_canvas) {
+function Game(canvases) {
     // TODO: Put these guys into a clojure scope to reduce instance access
-    this.static_context = static_canvas.getContext("2d");
-    this.dynamic_context = dynamic_canvas.getContext("2d");
-    this.dynamic_context.lineWidth = 1.5;
+    this.contexts = {
+        'level': canvases.static.getContext("2d"),
+        'entities': canvases.dynamic.getContext("2d")
+    }
+    this.contexts.entities.lineWidth = 1.5;
 
-    this.size = [static_canvas.width, static_canvas.height];
+    this.size = [canvases.static.width, canvases.static.height];
 
     this.players = [];
     this.num_players = this.players.length;
@@ -25,6 +27,8 @@ function Game(static_canvas, dynamic_canvas) {
     var self = this;
     var tick_num = 0;
 
+    var entity_context = this.contexts.entities;
+
     var game_tick = function() {
         var now = +new Date();
         var time_delta = now - self.time_last_tick;
@@ -33,12 +37,12 @@ function Game(static_canvas, dynamic_canvas) {
 
         for(var i=0; i<self.num_players; i++) {
             var p = self.players[i];
-            if(p.is_active) p.move(self.dynamic_context, self.level, time_delta);
+            if(p.is_active) p.move(entity_context, self.level, time_delta);
         }
 
         // Execute the rest half as frequently
         if(tick_num % 2 == 0) {
-            // XXX: // self.level.state.render_entities(now);
+            self.level.state.entity_animator.draw(entity_context, now);
             self.ui['timer'][0].innerHTML = Number((now - self.time_started)/1000).toFixed(1);
         }
         self.time_last_tick = now;
@@ -216,7 +220,7 @@ Game.prototype = {
     },
     load_level: function(level, callback) {
         this.level = level;
-        level.load(this.static_context, this.size, function() {
+        level.load(this.contexts, this.size, function() {
             if(callback!==undefined) callback.call(this);
         });
 

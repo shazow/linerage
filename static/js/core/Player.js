@@ -44,10 +44,13 @@ Player.prototype = {
 
         if(!in_boundary(new_pos, [0,0,level.size[0]-1, level.size[1]-1])) {
             this.is_active = false;
-            $(window).trigger('die', [self, Player.EVENTS.FALL_OFF])
+            $(window).trigger('die', [self, Player.EVENTS.FALL_OFF]);
+
         } else if(this.is_active) {
 
             // FIXME: Clean this up, it's fugly.
+
+            var collider = level.state.entity_collider.collider;
 
             iter_line(old_pos, new_pos, function(pos) {
                 if(pos[0] == old_pos[0] && pos[1] == old_pos[1]) return true; // Skip the first one
@@ -55,6 +58,7 @@ Player.prototype = {
                 var hit = level.is_collision(pos);
                 if(!hit) {
                     // FIXME: This is a ridiculous chain.
+                    collider.set(pos, true);
                     return true;
                 }
 
@@ -65,7 +69,7 @@ Player.prototype = {
                     return false;
                 }
 
-                return hit.do_collision(self);
+                return hit.do_collision(self, ctx);
             });
         }
 

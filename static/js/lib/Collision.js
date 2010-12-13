@@ -17,45 +17,6 @@ var BoxEntity = function(box) {
 }
 
 
-var EntityAnimator = function() {
-    this.time_drawn = +new Date();
-    this.init();
-}
-EntityAnimator.prototype = {
-    init: function() {
-        this.entities = [];
-    },
-    add: function(entity) {
-        this.entities.push(entity);
-    },
-    remove: function(entity) {
-        for(var entities=this.entities, i=entities.length-1; i>=0; i--) {
-            if(entity==entities[i]) {
-                entities.splice(i, 1);
-                return true;
-            }
-        }
-    },
-    draw: function(ctx) {
-        // TODO: Pass `now` in?
-        var now = +new Date();
-
-        for(var entities=this.entities, i=entities.length-1; i>=0; i--) {
-            var entity = entities[i];
-
-            // TODO: Optimize this by keeping a sorted list of entities based
-            // on their time to draw.
-            if(now - entity.time_drawn < entity.draw_rate) continue;
-
-            entity.draw(ctx);
-        }
-
-        this.time_drawn = now;
-    }
-}
-
-
-
 var PositionCollider = function(size) {
     this.size = size;
 }
@@ -135,7 +96,7 @@ EntityCollider.prototype = {
 
     },
     get: function(pos) {
-        if(!this.collider.get(pos)) return;
+        if(!this.collider.get(pos)) return false;
         // FIXME: Should this be callback-based to handle multiple collisions?
 
         // Check boxes
@@ -151,6 +112,8 @@ EntityCollider.prototype = {
             var entity = circles[i];
             if(in_radius(pos, entity.pos, entity.radius)) return entity;
         }
+
+        return true;
     }
 }
 
