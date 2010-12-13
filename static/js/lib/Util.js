@@ -58,7 +58,7 @@ function make_grid(size, fn) {
 
 function make_grid_fast(size, value) {
     var grid = [];
-    var w = size[0], h = size[1];
+    var w = size[0]-1, h = size[1]-1;
     for (var x=w; x>=0; x--) {
         var row = [];
         for(var y=h; y>=0; y--) row.push(value);
@@ -111,6 +111,14 @@ function iter_line(A, B, fn) {
             error += dx;
         }
     }
+}
+
+function draw_grid_to_ctx(grid, ctx, box) {
+    ctx.fillStyle = 'rgb(255,255,255)';
+    iter_box(box, function(pos) {
+        if(!grid[pos[0]][pos[1]]) return;
+        ctx.fillRect(pos[0], pos[1], 1, 1);
+    });
 }
 
 function flat_idx(dim, pos) {

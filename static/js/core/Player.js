@@ -1,4 +1,4 @@
-function Player(game, config) {
+function Player(config) {
     // Constants
     this.speed = 8; // Pixels per second
     this.turn_rate = this.speed / 6; // Radians per second
@@ -13,7 +13,6 @@ function Player(game, config) {
     this.reset();
 
     // Init
-    this.game = game;
     this.color = config.color || 'rgb(255,255,255)';
     this.name = config.name || 'Anonymous';
     this.controls = config.controls;
@@ -25,7 +24,7 @@ Player.prototype = {
         this.angle = angle === undefined ? Math.random() * 2 : angle;
         this.move_buffer = null;
     },
-    move: function(level, time_delta) {
+    move: function(ctx, level, time_delta) {
         if(this.move_buffer) {
             if(this.move_buffer == 'left') this.angle -= this.turn_rate * time_delta / 1000;
             else if(this.move_buffer == 'right') this.angle += this.turn_rate * time_delta / 1000;
@@ -43,7 +42,7 @@ Player.prototype = {
         // Skip render to rounding?
         if(new_pos[0] == old_pos[0] && new_pos[1] == old_pos[1]) return;
 
-        if(!in_boundary(new_pos, world.boundary)) {
+        if(!in_boundary(new_pos, [0,0,level.size[0]-1, level.size[1]-1])) {
             this.is_active = false;
             $(window).trigger('die', [self, Player.EVENTS.FALL_OFF])
         } else if(this.is_active) {
@@ -51,19 +50,18 @@ Player.prototype = {
             // FIXME: Clean this up, it's fugly.
 
             iter_line(old_pos, new_pos, function(pos) {
-                if(pos[0] == pos1[0] && pos[1] == pos1[1]) return true; // Skip the first one
+                if(pos[0] == old_pos[0] && pos[1] == old_pos[1]) return true; // Skip the first one
 
-                var hit = self.level.is_collision(pos);
+                var hit = level.is_collision(pos);
                 if(!hit) {
-                    entity_collider.collider.set(pos, 1);
+                    // FIXME: This is a ridiculous chain.
                     return true;
                 }
 
                 if(hit===true) {
                     self.is_active = false;
                     $(window).trigger('die', [self, Player.EVENTS.COLLIDED])
-                    self.new_post = pos;
-                    new_pos = pos;
+                    new_pos = self.new_post = pos;
                     return false;
                 }
 
@@ -71,7 +69,6 @@ Player.prototype = {
             });
         }
 
-        var ctx = this.entity_context;
         ctx.strokeStyle = this.color;
         ctx.beginPath();
         ctx.moveTo(old_pos[0], old_pos[1]);
@@ -82,17 +79,6 @@ Player.prototype = {
         // Get normalized position on context
         return [Math.round(this.pos[0]), Math.round(this.pos[1])];
     },
-    bind_control_listen: function(name) {
-        var fn = document.onkeydown;
-        var self = this;
-        document.onkeydown = function(e) {
-            if(e.which == 32 || e.which == 33) return; // Reserved: ESC and SPACE // FIXME: Use a dict
-            if(self.game._controls_cache[e.which]) return; // Taken
-            self.controls[name] = e.which;
-            document.onkeydown = fn;
-            self.game._refresh_controls_cache();
-        }
-    }
 }
 
 Player.CONTROL_KEYS = ['left', 'right'];

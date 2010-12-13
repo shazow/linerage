@@ -33,12 +33,12 @@ function Game(static_canvas, dynamic_canvas) {
 
         for(var i=0; i<self.num_players; i++) {
             var p = self.players[i];
-            if(p.is_active) p.move(self.level, time_delta);
+            if(p.is_active) p.move(self.dynamic_context, self.level, time_delta);
         }
 
         // Execute the rest half as frequently
         if(tick_num % 2 == 0) {
-            self.level.render_entities(now);
+            // XXX: // self.level.state.render_entities(now);
             self.ui['timer'][0].innerHTML = Number((now - self.time_started)/1000).toFixed(1);
         }
         self.time_last_tick = now;
@@ -179,7 +179,7 @@ Game.prototype = {
     },
     reset: function() {
         if(!this.is_ready) return;
-        var starts = this.level.start_positions;
+        var starts = this.level.state.start_positions;
         for(var i=0; i<this.num_players; i++) {
             var start_obj = starts[i];
             this.players[i].reset(start_obj.pos, start_obj.angle);
@@ -192,12 +192,12 @@ Game.prototype = {
         this.ui['root'].addClass('inactive');
 
         this._refresh_game_conditions();
-        this.level.reset();
+        this.level.state.reset();
         this.resume();
     },
     add_player: function() {
         if(!this.is_ended || this.num_players >= 4) return;
-        this.players.push(new Player(this, Player.TEMPLATE_LIST[this.num_players]));
+        this.players.push(new Player(Player.TEMPLATE_LIST[this.num_players]));
         this.num_players = this.players.length;
         this._refresh_controls_cache();
     },
@@ -227,12 +227,8 @@ Game.prototype = {
         t.empty();
         for(var i=0, stop=this.num_players; i<stop; i++) {
             var p = this.players[i];
-            var player_ui = $('<li> \
-                <span class="color" style="background: '+p.color+'"></span> \
-                <span class="name">'+p.name+'</span> \
-                (<span class="wins">'+p.num_wins+'</span> wins, <span class="longest">'+Number(p.max_time_alive/1000).toFixed(1)+'s</span>) \
-                <div class="controls"><span class="button">'+ KEY_CODES[p.controls['left']] +'</span> &harr; <span class="button">'+ KEY_CODES[p.controls['right']] +'</span></div> \
-            </li>');
+            var seconds = Number(p.max_time_alive / 1000).toFixed(1);
+            var player_ui = $('<li><span class="color" style="background: '+p.color+'"></span> <span class="name">'+p.name+'</span> (<span class="wins">'+p.num_wins+'</span> wins, <span class="longest">'+seconds+'s</span>) <div class="controls"><span class="button">'+ KEY_CODES[p.controls['left']] +'</span> &harr; <span class="button">'+ KEY_CODES[p.controls['right']] +'</span></div> </li>');
             t.append(player_ui);
         }
     },
@@ -247,5 +243,16 @@ Game.prototype = {
         }
         this._controls_cache = cache;
         this.draw_scoreboard();
+    },
+    bind_control_listen: function(player, name) {
+        var fn = document.onkeydown;
+        var self = this;
+        document.onkeydown = function(e) {
+            if(e.which == 32 || e.which == 33) return; // Reserved: ESC and SPACE // FIXME: Use a dict
+            if(self._controls_cache[e.which]) return; // Taken
+            player.controls[name] = e.which;
+            document.onkeydown = fn;
+            self._refresh_controls_cache();
+        }
     }
 }

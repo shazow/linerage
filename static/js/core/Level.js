@@ -5,34 +5,68 @@ function Level(config) {
     this.config = config;
     this.name = config.name
 
-    this.is_deathmatch = true;
     this.size = [640,480];
-    this.score = 0;
 
-    this.start_positions = [];
-    this.reset();
+    this.unload();
 }
 Level.last_loaded = null;
 Level.prototype = {
-    reset: function() {
+    unload: function() {
         this.is_loaded = false;
-
-        // TODO: Should these all compound each other?
-        this.entity_animator = new EntityAnimator();
-        this.entity_collider = new EntityCollider(this.size);
-        this.level_collider = new PositionCollider(this.size);
+        this.state = null;
     },
-    _preprocess: function(ctx) {
+    load: function(ctx, size, callback) {
+        this.size = size;
+
+        if(Level.last_loaded && Level.last_loaded != this) Level.last_loaded.unload();
+
         var self = this;
+        var process = function() {
+            ctx.clearRect(0, 0, size[0], size[1]);
+            ctx.drawImage(self.img, 0, 0);
 
-        this.entity_collider.init();
-        this.level_collider.init();
-        this.level_collider.set_from_canvas(ctx, [0, 0, this.size[0]-1, this.size[1]-1]);
+            if(!self.is_loaded) {
+                self.is_loaded = true;
+                self.state = new LevelState(size, self.config.entities, ctx);
+            }
 
-        if(!this.config || !this.config.entities) return;
+            if(callback!==undefined) callback();
+        }
 
-        var entities = this.config.entities;
+        if(this.is_loaded) {
+            process();
+        } else {
+            this.img.src = this.src;
+            this.img.onload = process;
+        }
 
+        Level.last_loaded = self;
+    },
+    is_collision: function(pos) {
+        if(!this.state.level_collider.get(pos)) return false;
+
+        return this.state.entity_collider.get(pos) || true;
+    },
+}
+
+function LevelState(size, entities, context) {
+    this.size = size;
+    this.entities = entities;
+    this.context = context;
+
+    // TODO: Should these all compound each other?
+    this.entity_animator = new EntityAnimator();
+    this.entity_collider = new EntityCollider(this.size);
+    this.level_collider = new PositionCollider(this.size);
+
+    this.level_collider.init();
+    this.level_collider.set_from_canvas(context, [0, 0, this.size[0], this.size[1]]);
+
+    this.reset();
+}
+LevelState.prototype = {
+    load_entities: function() {
+        var entities = this.entities;
         for(var i=entities.length-1; i>=0; i--) {
             var e = entities[i];
 
@@ -54,41 +88,17 @@ Level.prototype = {
             }
         }
     },
-    load: function(ctx, size, callback) {
-        this.size = size;
+    reset: function() {
+        this.start_positions = [];
+        this.is_deathmatch = true;
+        this.score = 0;
 
-        if(Level.last_loaded && Level.last_loaded != this) Level.last_loaded.unload();
+        this.entity_collider.init();
+        this.entity_animator.init();
 
-        var self = this;
-        var process = function() {
-            ctx.clearRect(0, 0, size[0], size[1]);
-            ctx.drawImage(self.img, 0, 0);
-
-            if(!self.is_loaded) {
-                self.is_loaded = true;
-                self._preprocess(ctx);
-            }
-
-            if(callback!==undefined) callback();
-        }
-
-        if(this.is_loaded) {
-            process();
-        } else {
-            this.img.src = this.src;
-            this.img.onload = process;
-        }
-
-        Level.last_loaded = self;
-    },
-    is_collision: function(pos) {
-        if(!this.level_collider.get(pos)) return false;
-
-        return this.entity_collider.get(pos) || true;
-    },
+        this.load_entities();
+    }
 }
-
-
 
 
 

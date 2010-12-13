@@ -2,24 +2,8 @@
 //  Animated / Static
 //  Position / Box / Radius
 //  Collidable / Ghost
-
-var Entities = {
-    'START': StartEntity,
-    'END': EndEntity,
-    'BONUS': BonusEntity
-}
-
-
-function StartEntity(config, level) {
-    this.pos = config.pos;
-    this.angle = config.angle;
-    this.level = level;
-}
-
 function EndEntity(box) {
-    this.box = config.box;
-    this.level = level;
-    this.context = level.context;
+    this.box = box;
 
     this.time_animated = +new Date();
     this.color = new Cycle(EndEntity.colors);
@@ -50,20 +34,13 @@ EndEntity.prototype = {
     }
 }
 
-function BonusEntity(config, level) {
-    this.box = config.box;
-    this.level = level;
-
+function BonusEntity(box) {
+    this.box = box;
     this.is_active = true;
     this.is_animated = true;
     this.is_collidable = true;
 }
 BonusEntity.prototype = {
-    reset: function() {
-        this.is_active = true;
-        this.is_animated = true;
-        this.is_collidable = true;
-    },
     is_collision: function(pos) {
         return in_boundary(pos, this.box);
     },
@@ -85,7 +62,7 @@ BonusEntity.prototype = {
         ctx.fillRect(box[0], box[1], box[2]-box[0], box[3]-box[1]);
         return false;
     },
-    clear: function(ctx);
+    clear: function(ctx) {
         var box = this.box;
         ctx.clearRect(box[0], box[1], box[2]-box[0], box[3]-box[1]);
 

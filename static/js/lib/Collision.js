@@ -18,11 +18,11 @@ var BoxEntity = function(box) {
 
 
 var EntityAnimator = function() {
-    this.reset();
     this.time_drawn = +new Date();
+    this.init();
 }
 EntityAnimator.prototype = {
-    reset: function() {
+    init: function() {
         this.entities = [];
     },
     add: function(entity) {
@@ -80,18 +80,19 @@ PositionCollider.prototype = {
         var x1 = box[0], y1 = box[1], x2 = box[2], y2 = box[3];
         var dx = x2-x1, dy = y2-y1;
 
-        var data = ctx.getImageData(x1, y2, dx, dy).data;
+        var data = ctx.getImageData(x1, y1, dx, dy).data;
         var grid = this.grid;
 
         var i = 3;
-        for(var x=x1; x<=x2; x++) {
-            for(var y=y1; y<=y2; y++, i+=4) {
-                grid[x][y] = data[i] == 255 ? 1 : 0;
+        for(var y=y1; y<y2; y++) {
+            for(var x=x1; x<x2; x++) {
+                grid[x][y] = data[i] == 255;
+                i+= 4;
             }
         }
     },
     get: function(pos) {
-        return this.grid[pos[0]][pos[1]] > 0;
+        return this.grid[pos[0]][pos[1]] != false;
     }
 }
 
@@ -105,6 +106,7 @@ EntityCollider.prototype = {
         this.circles = [];
         this.boxes = [];
         this.collider = new PositionCollider(this.size);
+        this.collider.init();
     },
     add: function(entity) {
         // XXX: Add entity to this.collider
