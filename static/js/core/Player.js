@@ -1,7 +1,7 @@
 function Player(config) {
     // Constants
     this.speed = 8; // Pixels per second
-    this.turn_rate = this.speed / 6; // Radians per second
+    this.turn_rate = this.speed / 5.5; // Radians per second
     this.angle = 0;
 
     this.max_time_alive = 0;
@@ -74,6 +74,7 @@ Player.prototype = {
         }
 
         ctx.strokeStyle = this.color;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(old_pos[0], old_pos[1]);
         ctx.lineTo(new_pos[0], new_pos[1]);

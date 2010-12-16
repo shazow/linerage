@@ -25,8 +25,6 @@
 <script src="js/extern/jquery-1.4.4.min.js"></script>
 <script src="js/extern/jquery.disable.text.select.js"></script>
 
-<script src="js/dev/Stats.js"></script>
-
 <script src="js/lib/Util.js"></script>
 <script src="js/lib/Collision.js"></script>
 
@@ -37,8 +35,9 @@
 <script src="js/core/Game.js"></script>
 <script src="js/core/Init.js"></script>
 
+<!-- Dev only -->
+<script src="js/dev/Stats.js"></script>
 <script type="text/javascript">
-    // Dev
     stats = new Stats();
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0';
@@ -46,6 +45,7 @@
 
     $("body")[0].appendChild(stats.domElement);
 </script>
+<!-- -->
 
 </body>
 

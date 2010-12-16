@@ -7,7 +7,11 @@ function in_boundary(pos, box) {
 
 function in_radius(pos, circle_pos, circle_radius) {
     var dx = pos[0] - circle_pos[0], dy = pos[1] - circle_pos[1];
-    return circle_radius*circle_radius < dx*dx + dy*dy;
+    return circle_radius*circle_radius >= dx*dx + dy*dy;
+}
+
+function boundary_center(box) {
+    return [box[0] - (box[0]-box[2])/2, box[1] - (box[1]-box[3])/2];
 }
 
 function bounding_square(pos, size) {

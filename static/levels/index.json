@@ -8,7 +8,7 @@
                     {"type": "START", "pos": [200, 25], "angle": 0.35},
                     {"type": "START", "pos": [200, 35], "angle": 0.37},
                     {"type": "END", "box": [300, 200, 320, 220]},
-                    {"type": "BONUS", "box": [250,60,260,70]}
+                    {"type": "BONUS", "pos": [255,65]}
                 ]
             },
             {"name": "Orange",

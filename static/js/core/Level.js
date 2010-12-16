@@ -56,7 +56,6 @@ function LevelState(size, entities, contexts) {
     this.contexts = contexts;
 
     // TODO: Should these all compound each other?
-    this.entity_animator = new EntityAnimator();
     this.entity_collider = new EntityCollider(this.size);
     this.level_collider = new PositionCollider(this.size);
 
@@ -83,16 +82,15 @@ LevelState.prototype = {
                     var entity = new EndEntity(e.box);
                     this.entity_collider.add(entity);
                     entity.draw(ctx);
-                    this.entity_animator.add(entity);
-                    this.entity_collider.collider.set_from_canvas(ctx, entity.box);
+                    this.entity_collider.collider.set_box(entity.box);
 
                     break;
                 case 'BONUS':
-                    var entity = new BonusEntity(e.box);
+                    var entity = new BonusEntity(e.pos);
 
                     this.entity_collider.add(entity);
                     entity.draw(ctx);
-                    this.entity_collider.collider.set_from_canvas(ctx, entity.box);
+                    this.entity_collider.collider.set_box(entity.get_boundary());
 
                     break;
             }
@@ -107,7 +105,6 @@ LevelState.prototype = {
         ctx.clearRect(0, 0, this.size[0], this.size[1]);
 
         this.entity_collider.init();
-        this.entity_animator.init();
 
         this.load_entities();
     }

@@ -42,7 +42,6 @@ function Game(canvases) {
 
         // Execute the rest half as frequently
         if(tick_num % 2 == 0) {
-            self.level.state.entity_animator.draw(entity_context, now);
             self.ui['timer'][0].innerHTML = Number((now - self.time_started)/1000).toFixed(1);
         }
         self.time_last_tick = now;

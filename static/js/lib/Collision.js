@@ -106,6 +106,9 @@ EntityCollider.prototype = {
             if(in_boundary(pos, entity.box)) return entity;
         }
 
+        // FIXME: No circles for now.
+        return true;
+
         // Check circles
         var circles = this.circles;
         for(var i=circles.length-1; i>=0; i--) {
