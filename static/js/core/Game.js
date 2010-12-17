@@ -143,7 +143,16 @@ function Game(canvases) {
         }
         return false;
     }).bind('lose', function(e, player, how) {
-        if(self.num_players > 1) {
+        if(self.level.is_deathmatch) {
+            // Find active player
+            var players = self.players;
+            for(var i=players.length-1; i>=0; i--) {
+                if(players[i].is_active) {
+                    $(window).trigger('win', [players[i], Player.EVENTS.SURVIVED]);
+                    return;
+                }
+            }
+        } else if(self.num_players > 1) {
             message("Complete failure.");
         } else if(how==Player.EVENTS.COLLIDED || how==Player.EVENTS.FALL_OFF) {
             message("You died.");

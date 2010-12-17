@@ -96,5 +96,6 @@ Player.TEMPLATE_LIST = [
 Player.EVENTS = {
     FALL_OFF: 1,
     COLLIDED: 2,
-    ESCAPED: 3
+    ESCAPED: 3,
+    SURVIVED: 4
 }
