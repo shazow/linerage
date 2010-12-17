@@ -40,12 +40,14 @@ h1.active {
     height: 440px;
     margin: 10px auto;
     padding: 10px;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.7);
 }
 #hud h2 {
-    font-family: georgia;
-    letter-spacing: 3px;
+    font-family: sans-serif;
+    letter-spacing: 4px;
     text-align: center;
+    color: #9e0000;
+    font-weight: normal;
 }
 #hud ol {
     padding: 0;
@@ -53,12 +55,18 @@ h1.active {
     list-style: none;
 }
 #hud #packs li {
-    margin: 5px 40px;
-    padding: 5px 10px;
-    border: 1px solid #eee;
+    margin: 6px 40px;
+    padding: 6px 10px;
+    border: 2px solid #500;
+    outline: 2px solid #300;
+    background: #220000;
+    font-family: monospace;
+    font-size: 16px;
+    color: #ffe4e4;
+    text-shadow: 2px 2px 0px #000;
 }
 #hud #packs li:hover, #hud #packs li.selected {
-    background: #555;
+    background: #300;
     cursor: pointer;
 }
 #hud #description {

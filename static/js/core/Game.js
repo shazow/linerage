@@ -104,6 +104,8 @@ function Game(canvases) {
                     self.continue_fn = self.resume;
                 });
             }
+        } else {
+            hud.show("packs");
         }
         return false;
     }).bind('die', function(e, player, how) {
@@ -176,6 +178,7 @@ Game.prototype = {
         this.continue_fn = function() {
             self.reset();
             hud.show("description");
+            message("Ready?");
             self.continue_fn = self.resume;
         }
     },
