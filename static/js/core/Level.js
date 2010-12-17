@@ -6,6 +6,7 @@ function Level(config) {
     this.name = config.name
     this.description = config.description;
     this.min_players = config.min_players || 0;
+    this.max_players = Math.min(config.min_players || 4, this.min_players);
     this.is_deathmatch = config.is_deathmatch || false;
 
     this.size = [640,480];
@@ -37,7 +38,7 @@ Level.prototype = {
             if(callback!==undefined) callback();
         }
 
-        if(this.is_loaded) {
+        if(this.img.src) {
             process();
         } else {
             this.img.src = this.src;

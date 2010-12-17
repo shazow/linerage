@@ -3,6 +3,17 @@ function Hud(game, target) {
     this.target = $(target);
     this.packs = [];
     this.active = false;
+
+    var self = this;
+    this.logo = $("h1:first").click(function() {
+        if(!self.active) {
+            self.game.pause();
+            self.show("packs");
+        } else if(self.game.is_fresh) {
+            self.hide();
+            self.game.resume();
+        }
+    });
 }
 Hud.prototype = {
     add_pack: function(pack) {
@@ -33,8 +44,12 @@ Hud.prototype = {
                         if(level.description) {
                             $(description).html(level.description);
                             self.show('description');
+                        } else {
+                            self.hide();
                         }
                         game.is_ready = true;
+                        game.reset();
+                        game.continue_fn = game.resume;
                         message("Ready? Press <em>Space</em> to start.");
                     });
 
@@ -48,9 +63,12 @@ Hud.prototype = {
         $('.state', this.target).hide();
         this.active = $('#' + id + '.state', this.target).show();
         $(this.target).show();
+        if(id=="packs") $(this.logo).addClass("active");
+        else $(this.logo).removeClass("active");
     },
     hide: function() {
         this.active = false;
         $(this.target).hide();
+        $(this.logo).removeClass("active");
     }
 }

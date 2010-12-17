@@ -14,6 +14,7 @@ function Game(canvases) {
     this.num_end = Math.min(1, this.num_players-1);
 
     this.is_ready = false;
+    this.is_fresh = false;
     this.is_paused = true;
     this.is_ended = true;
 
@@ -40,10 +41,6 @@ function Game(canvases) {
             if(p.is_active) p.move(entity_context, self.level, time_delta);
         }
 
-        // Execute the rest half as frequently
-        if(tick_num % 2 == 0) {
-            self.ui['timer'][0].innerHTML = Number((now - self.time_started)/1000).toFixed(1);
-        }
         self.time_last_tick = now;
         tick_num++;
     }
@@ -77,19 +74,6 @@ function Game(canvases) {
         }
     };
 
-    this.ui = {
-        'root': $("#game nav"),
-        'players': $('<ul id="players"></ul>'),
-        'timer': $('<div id="timer">0.0</div>'),
-        'add_player': $('<input type="button" value="Add Player"></input>').click(function() {
-            self.add_player();
-        }),
-        'remove_player': $('<input type="button" value="Remove Player"></input>').click(function() {
-            self.remove_player();
-        })
-    };
-    this.ui['root'].append(this.ui['timer']).append(this.ui['add_player']).append(this.ui['remove_player']).append(this.ui['players']);
-
     this.add_player();
 
     $(window).bind('win', function(e, player, how) {
@@ -115,8 +99,9 @@ function Game(canvases) {
                 message("Loading.");
                 self.load_level(m, function() {
                     self.is_ready = true;
+                    self.reset();
                     message("Ready?");
-                    self.continue_fn = self.reset;
+                    self.continue_fn = self.resume;
                 });
             }
         }
@@ -176,6 +161,7 @@ Game.prototype = {
         message("");
         this.is_paused = false;
         this.continue_fn = this.pause;
+        this.is_fresh = false;
 
         this.time_last_tick = +new Date();
         this.loop = setInterval(this.game_loop, 1000 / 30);
@@ -185,14 +171,19 @@ Game.prototype = {
 
         this.is_ended = true;
         this.is_paused = true;
-        this.continue_fn = this.reset;
 
-        this.ui['root'].removeClass('inactive');
-        this.draw_scoreboard();
+        var self = this;
+        this.continue_fn = function() {
+            self.reset();
+            hud.show("description");
+            self.continue_fn = self.resume;
+        }
     },
     reset: function() {
         if(!this.is_ready) return;
+
         var starts = this.level.state.start_positions;
+
         for(var i=0; i<this.num_players; i++) {
             var start_obj = starts[i] || {};
             this.players[i].reset(start_obj.pos, start_obj.angle);
@@ -202,11 +193,10 @@ Game.prototype = {
         this.is_ended = false;
         this.continue_fn = this.pause;
 
-        this.ui['root'].addClass('inactive');
+        this.is_fresh = true;
 
         this._refresh_game_conditions();
         this.level.state.reset();
-        this.resume();
     },
     add_player: function() {
         if(!this.is_ended || this.num_players >= 4) return;
@@ -228,24 +218,16 @@ Game.prototype = {
         }
     },
     load_level: function(level, callback) {
+        this.end();
         var self = this;
         this.level = level;
         level.load(this.contexts, this.size, function() {
-            while(self.num_players < level.min_players) self.add_player();
+            for(var i=0; self.num_players < level.min_players && i<5; i++) self.add_player();
+            for(var i=0; self.num_players > level.max_players && i<5; i++) self.remove_player();
+
             if(callback!==undefined) callback.call(this);
         });
 
-    },
-    draw_scoreboard: function() {
-        var self = this;
-        var t = this.ui['players'];
-        t.empty();
-        for(var i=0, stop=this.num_players; i<stop; i++) {
-            var p = this.players[i];
-            var seconds = Number(p.max_time_alive / 1000).toFixed(1);
-            var player_ui = $('<li><span class="color" style="background: '+p.color+'"></span> <span class="name">'+p.name+'</span> (<span class="wins">'+p.num_wins+'</span> wins, <span class="longest">'+seconds+'s</span>) <div class="controls"><span class="button">'+ KEY_CODES[p.controls['left']] +'</span> &harr; <span class="button">'+ KEY_CODES[p.controls['right']] +'</span></div> </li>');
-            t.append(player_ui);
-        }
     },
     _refresh_controls_cache: function() {
         var cache = {};
@@ -257,17 +239,5 @@ Game.prototype = {
             }
         }
         this._controls_cache = cache;
-        this.draw_scoreboard();
     },
-    bind_control_listen: function(player, name) {
-        var fn = document.onkeydown;
-        var self = this;
-        document.onkeydown = function(e) {
-            if(e.which == 32 || e.which == 33) return; // Reserved: ESC and SPACE // FIXME: Use a dict
-            if(self._controls_cache[e.which]) return; // Taken
-            player.controls[name] = e.which;
-            document.onkeydown = fn;
-            self._refresh_controls_cache();
-        }
-    }
 }

@@ -71,18 +71,21 @@ $(document).ready(function() {
                     "url": "levels/deathmatch/blank.png",
                     "description": "<p>Player 1 controls: Arrow keys</p><p>Player 2 controls: A/S</p>",
                     "is_deathmatch": true,
+                    "max_players": 4,
                     "min_players": 2
                 },
                 {"name": "3 Players",
                     "url": "levels/deathmatch/blank.png",
                     "description": "<p>Player 1 controls: Arrow keys</p><p>Player 2 controls: A/S</p><p>Player 3 controls: K/L</p>",
                     "is_deathmatch": true,
+                    "max_players": 3,
                     "min_players": 3
                 },
                 {"name": "4 Players",
                     "url": "levels/deathmatch/blank.png",
                     "description": "<p>Player 1 controls: Arrow keys</p><p>Player 2 controls: A/S</p><p>Player 3 controls: K/L</p><p>Player 4 controls: Num Pad</p>",
                     "is_deathmatch": true,
+                    "max_players": 4,
                     "min_players": 4
                 }
             ]}
