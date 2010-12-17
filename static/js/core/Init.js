@@ -1,4 +1,4 @@
-var game, stats, levelpacks = [];
+var game, hud, stats, levelpacks = [];
 $(document).ready(function() {
     $("body").disableTextSelect();
     game = new Game({
@@ -6,25 +6,89 @@ $(document).ready(function() {
         'dynamic': document.getElementById("dynamic_canvas")
     });
 
-    $.getJSON("levels/index.json", function(r) {
-        foo = r;
-        for(var i=0, stop=r.packs.length; i<stop; i++) {
-            var pack = r.packs[i];
+    hud = new Hud(game, $("#hud"));
+    function load_levelpack(pack) {
+        // FIXME: Let levelpacks load dynamically later?
+        if(!pack.manifest) continue;
 
-            // FIXME: Let levelpacks load dynamically later?
-            if(!pack.manifest) continue;
-
-            var levels = [];
-            for(var j=0, jstop=pack.manifest.levels.length; j<jstop; j++) {
-                levels.push(new Level(pack.manifest.levels[j]));
-            }
-            levelpacks.push(new LevelPack(r.name, levels));
+        var levels = [];
+        for(var j=0, jstop=pack.manifest.levels.length; j<jstop; j++) {
+            levels.push(new Level(pack.manifest.levels[j]));
         }
+        var levelpack = new LevelPack(pack.name, levels);
 
-        game.levelpack = levelpacks[0];
-        game.load_level(game.levelpack.first(), function() {
-            game.is_ready = true;
-            message("Ready? Press <em>Space</em> to start.");
-        });
-    });
+        hud.add_pack(levelpack);
+    };
+
+    load_levelpack(
+        {"name": "Singleplayer Puzzles", "manifest":
+            {"levels": [
+                {"name": "1 - Pink",
+                    "url": "levels/easy/pink.png",
+                    "description": "Don't hit things. Try to get the delicious red circles for bonus points.",
+                    "entities": [
+                        {"type": "START", "pos": [200, 25], "angle": 0.35},
+                        {"type": "START", "pos": [200, 35], "angle": 0.37},
+                        {"type": "END", "box": [300, 200, 320, 220]},
+                        {"type": "BONUS", "pos": [255,65]}
+                    ]
+                },
+                {"name": "2 - Orange",
+                    "url": "levels/easy/orange.png",
+                    "description": "",
+                    "entities": [
+                        {"type": "START", "pos": [50, 375], "angle": 1.6},
+                        {"type": "START", "pos": [60, 370], "angle": 1.8},
+                        {"type": "END", "box": [600,350,620,370]}
+                    ]
+                },
+                {"name": "3 - Green",
+                    "url": "levels/easy/green.png",
+                    "description": "",
+                    "entities": [
+                        {"type": "START", "pos": [25, 25], "angle": 0.30},
+                        {"type": "START", "pos": [20, 30], "angle": 0.31},
+                        {"type": "END", "box": [375,200,395,220]}
+                    ]
+                },
+                {"name": "4 - Blue",
+                    "url": "levels/easy/blue.png",
+                    "description": "",
+                    "entities": [
+                        {"type": "START", "pos": [50, 300], "angle": 0.25},
+                        {"type": "START", "pos": [50, 320], "angle": 0.25},
+                        {"type": "END", "box": [550,230,570,250]}
+                    ]
+                }
+            ]}
+        }
+    );
+
+    load_levelpack(
+        {"name": "Hotseat Deathmatch", "manifest":
+            {"levels": [
+                {"name": "2 Players",
+                    "url": "levels/deathmatch/blank.png",
+                    "description": "<p>Player 1 controls: Arrow keys</p><p>Player 2 controls: A/S</p>",
+                    "is_deathmatch": true,
+                    "min_players": 2
+                },
+                {"name": "3 Players",
+                    "url": "levels/deathmatch/blank.png",
+                    "description": "<p>Player 1 controls: Arrow keys</p><p>Player 2 controls: A/S</p><p>Player 3 controls: K/L</p>",
+                    "is_deathmatch": true,
+                    "min_players": 3
+                },
+                {"name": "4 Players",
+                    "url": "levels/deathmatch/blank.png",
+                    "description": "<p>Player 1 controls: Arrow keys</p><p>Player 2 controls: A/S</p><p>Player 3 controls: K/L</p><p>Player 4 controls: Num Pad</p>",
+                    "is_deathmatch": true,
+                    "min_players": 4
+                }
+            ]}
+        }
+    );
+
+    hud.draw();
+    hud.show('packs');
 });

@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 
-<title>End of the Line</title>
+<title>LineRage</title>
 
 <link rel="icon" type="image/png" href="icon.png" />
 <link href="css/base.css" rel="stylesheet" type="text/css"/>
@@ -12,15 +12,14 @@
 </head>
 <body>
 
-<div id="intro">End of the Line. Don't hit things.</div>
-<div id="game">
-    <nav></nav>
-    <div style="width: 640px; height: 480px;">
-        <canvas id="dynamic_canvas" width="640" height="480" style="position: absolute; z-index: 2;"></canvas>
-        <canvas id="static_canvas" width="640" height="480" style="position: absolute; background: #000; z-index: 1;"></canvas>
+<div id="content">
+    <div id="game">
+        <div id="hud" style="display: none;"></div>
+        <canvas id="dynamic_canvas" width="640" height="480" style="z-index: 2;"></canvas>
+        <canvas id="static_canvas" width="640" height="480" style="z-index: 1;"></canvas>
     </div>
+    <div id="messages">LineRage</div>
 </div>
-<div id="messages">Loading.</div>
 
 <script src="js/extern/jquery-1.4.4.min.js"></script>
 <script src="js/extern/jquery.disable.text.select.js"></script>
@@ -33,6 +32,7 @@
 <script src="js/core/Entity.js"></script>
 
 <script src="js/core/Game.js"></script>
+<script src="js/core/Hud.js"></script>
 <script src="js/core/Init.js"></script>
 
 <!-- Dev only -->

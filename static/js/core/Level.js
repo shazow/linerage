@@ -4,6 +4,9 @@ function Level(config) {
 
     this.config = config;
     this.name = config.name
+    this.description = config.description;
+    this.min_players = config.min_players || 0;
+    this.is_deathmatch = config.is_deathmatch || false;
 
     this.size = [640,480];
 
@@ -67,6 +70,8 @@ function LevelState(size, entities, contexts) {
 LevelState.prototype = {
     load_entities: function() {
         var entities = this.entities;
+        if(!entities) return;
+
         var ctx = this.contexts.entities;
 
         for(var i=entities.length-1; i>=0; i--) {

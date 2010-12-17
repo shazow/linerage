@@ -2,15 +2,58 @@ body {
     background: #222;
     margin: 0; padding: 0;
 }
+#content {
+    padding: 10px;
+}
 #game {
     width: 640px;
-    margin: 0px auto;
+    height: 480px;
+    margin: 0 auto;
+    background: #000;
+    border: 5px solid #292929;
 }
-#game nav {
+#game > * {
     position: absolute;
-    width: 200px;
-    margin-left: -200px;
+    width: 640px;
+    height: 480px;
 }
+#hud {
+    color: #eee;
+    z-index: 3;
+}
+#hud #packs {
+    width: 440px;
+    height: 440px;
+    margin: 10px auto;
+    padding: 10px;
+    background: rgba(0,0,0,0.8);
+}
+#hud h2 {
+    font-family: georgia;
+    letter-spacing: 3px;
+    text-align: center;
+}
+#hud ol {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+#hud #packs li {
+    margin: 5px 40px;
+    padding: 5px 10px;
+    border: 1px solid #eee;
+}
+#hud #packs li:hover, #hud #packs li.selected {
+    background: #555;
+    cursor: pointer;
+}
+#hud #description {
+    width: 440px;
+    margin: 10px auto;
+    padding: 10px;
+    background: rgba(0,0,0,0.4);
+}
+
 #messages {
     color: #e69d1e;
     text-shadow: 2px 2px 0px #000;
@@ -20,25 +63,6 @@ body {
 
     width: 640px;
     margin: 20px auto;
-}
-#intro {
-    color: #999;
-    text-shadow: 0px 1px 1px #000;
-    font-size: 16px;
-    font-family: georgia, serif;
-    text-align: center;
-    line-height: 42px;
-}
-input {
-    width: 80px;
-    border: 1px solid #aaa;
-    background: #666;
-    font-size: 9px;
-    margin: 10px;
-}
-input:hover {
-    background: #999;
-    cursor: pointer;
 }
 .inactive {
     opacity: 0.3;

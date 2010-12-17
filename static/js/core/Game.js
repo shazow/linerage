@@ -163,6 +163,7 @@ Game.prototype = {
         this.continue_fn = this.resume;
     },
     resume: function() {
+        hud.hide();
         message("");
         this.is_paused = false;
         this.continue_fn = this.pause;
@@ -184,7 +185,7 @@ Game.prototype = {
         if(!this.is_ready) return;
         var starts = this.level.state.start_positions;
         for(var i=0; i<this.num_players; i++) {
-            var start_obj = starts[i];
+            var start_obj = starts[i] || {};
             this.players[i].reset(start_obj.pos, start_obj.angle);
         }
         this.time_started = +new Date();
@@ -218,8 +219,10 @@ Game.prototype = {
         }
     },
     load_level: function(level, callback) {
+        var self = this;
         this.level = level;
         level.load(this.contexts, this.size, function() {
+            while(self.num_players < level.min_players) self.add_player();
             if(callback!==undefined) callback.call(this);
         });
 
