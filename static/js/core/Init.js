@@ -22,12 +22,24 @@ $(document).ready(function() {
     load_levelpack(
         {"name": "Singleplayer Puzzles", "manifest":
             {"levels": [
+                {"name": "White Level",
+                    "url": "levels/easy/white.png",
+                    "description": "<p>Use the arrow keys (left and right) to maneuver your line to the yellow portal.</p><p>Don't hit things. Try to get the delicious red circles for bonus points.</p>",
+                    "entities": [
+                        {"type": "START", "pos": [5, 5], "angle": 0.25},
+                        {"type": "END", "box": [350, 250, 370, 270]},
+                        {"type": "BONUS", "pos": [150,150]},
+                        {"type": "BONUS", "pos": [300,50]},
+                        {"type": "BONUS", "pos": [500,125]},
+                        {"type": "BONUS", "pos": [50,320]},
+                        {"type": "BONUS", "pos": [600,350]}
+                    ]
+                },
                 {"name": "Pink Level",
                     "url": "levels/easy/pink.png",
-                    "description": "Don't hit things. Try to get the delicious red circles for bonus points.",
+                    "description": "<p>Use the arrow keys (left and right) to maneuver your line to the yellow portal.</p><p>Don't hit things. Try to get the delicious red circles for bonus points.</p>",
                     "entities": [
                         {"type": "START", "pos": [200, 25], "angle": 0.35},
-                        {"type": "START", "pos": [200, 35], "angle": 0.37},
                         {"type": "END", "box": [300, 200, 320, 220]},
                         {"type": "BONUS", "pos": [255,65]}
                     ]
@@ -37,7 +49,6 @@ $(document).ready(function() {
                     "description": "",
                     "entities": [
                         {"type": "START", "pos": [50, 375], "angle": 1.6},
-                        {"type": "START", "pos": [60, 370], "angle": 1.8},
                         {"type": "END", "box": [600,350,620,370]}
                     ]
                 },
@@ -46,17 +57,7 @@ $(document).ready(function() {
                     "description": "",
                     "entities": [
                         {"type": "START", "pos": [25, 25], "angle": 0.30},
-                        {"type": "START", "pos": [20, 30], "angle": 0.31},
                         {"type": "END", "box": [375,200,395,220]}
-                    ]
-                },
-                {"name": "Blue Level",
-                    "url": "levels/easy/blue.png",
-                    "description": "",
-                    "entities": [
-                        {"type": "START", "pos": [50, 300], "angle": 0.25},
-                        {"type": "START", "pos": [50, 320], "angle": 0.25},
-                        {"type": "END", "box": [550,230,570,250]}
                     ]
                 }
             ]}
