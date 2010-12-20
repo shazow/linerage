@@ -1,0 +1,17 @@
+{
+  "name": "LineRage",
+  "description": "You are a line. Don't hit things.",
+  "version": "1.0",
+  "app": {
+    "launch": {
+      "local_path": "index.html"
+    }
+  },
+  "icons": {
+    "16": "icon_16.png",
+    "32": "icon_32.png",
+    "128": "icon_128.png"
+  },
+  "permissions": [
+  ]
+}
