@@ -23,6 +23,7 @@ Player.prototype = {
         this.pos = pos || [100 + Math.random() * 440, 100 + Math.random() * 280];
         this.angle = angle === undefined ? Math.random() * 2 : angle;
         this.move_buffer = null;
+        this.score = 0;
     },
     move: function(ctx, level, time_delta) {
         if(this.move_buffer) {

@@ -71,8 +71,11 @@ EndEntity.prototype = {
         return in_boundary(pos, this.box);
     },
     do_collision: function(player) {
+        player.is_active = false;
         player.score += 1000;
+        $("#score").text(player.score);
         $(window).trigger('win', [player, Player.EVENTS.ESCAPED]);
+        return false;
     }
 }
 
@@ -93,8 +96,9 @@ BonusEntity.prototype = {
         if(!this.is_active) return;
 
         this.is_active = false;
-        player.score += 1000;
+        player.score += 100;
         message("Yum.");
+        $("#score").text(player.score);
 
         this.clear(ctx);
     },

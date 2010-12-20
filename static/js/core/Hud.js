@@ -45,6 +45,7 @@ Hud.prototype = {
                             $(description).html(level.description);
                             self.show('description');
                         } else {
+                            $(description).html("");
                             self.hide();
                         }
                         game.is_ready = true;

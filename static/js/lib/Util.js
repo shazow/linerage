@@ -135,7 +135,5 @@ KEY_CODES = {8: "BACKSPACE", 9: "TAB", 13: "ENTER", 16: "SHIFT", 17: "CTRL", 18:
 function message(s) {
     if(message._target===undefined) message._target = document.getElementById("messages");
     message._target.innerHTML = s;
+    return message;
 }
-message.render = function() {
-}
-

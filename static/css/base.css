@@ -2,19 +2,30 @@ body {
     background: #222;
     margin: 0; padding: 0;
 }
+#header {
+    width: 640px;
+    margin: 0px auto;
+    padding-bottom: 10px;
+}
 h1 {
     color: #444;
-    text-align: center;
     text-shadow: 2px 2px 0px #000;
     font-weight: normal;
     font-size: 28px;
     font-family: georgia;
-    margin: 0 0 10px 0;
     cursor: pointer;
+    margin: 0;
 }
 h1.active {
     color: #e69d1e;
     cursor: default;
+}
+#score {
+    float: right;
+    font-size: 28px;
+    color: #999;
+    text-shadow: 2px 2px 0px #000;
+    font-family: georgia;
 }
 #content {
     padding: 10px;

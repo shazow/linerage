@@ -105,7 +105,15 @@ function Game(canvases) {
                 });
             }
         } else {
-            hud.show("packs");
+            self.continue_fn = function() {
+                hud.show("packs");
+                self.continue_fn = function() {
+                    self.reset();
+                    hud.show("description");
+                    message("Ready?");
+                    self.continue_fn = self.resume;
+                }
+            }
         }
         return false;
     }).bind('die', function(e, player, how) {
@@ -200,6 +208,8 @@ Game.prototype = {
 
         this._refresh_game_conditions();
         this.level.state.reset();
+
+        $("#score").text("0");
     },
     add_player: function() {
         if(!this.is_ended || this.num_players >= 4) return;
