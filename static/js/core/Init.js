@@ -8,7 +8,7 @@ $(document).ready(function() {
 
     hud = new Hud(game, $("#hud"));
     function load_levelpack(pack) {
-        if(!pack.manifest) continue;
+        if(!pack.manifest) return;
 
         var levels = [];
         for(var j=0, jstop=pack.manifest.levels.length; j<jstop; j++) {
@@ -77,7 +77,7 @@ $(document).ready(function() {
                         {"type": "BONUS", "pos": [90,415]},
                         {"type": "BONUS", "pos": [105,140]},
                         {"type": "BONUS", "pos": [510,265]},
-                        {"type": "BONUS", "pos": [240,275]},
+                        {"type": "BONUS", "pos": [240,275]}
                     ]
                 }
             ]}

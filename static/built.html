@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 
-<title>End of the Line</title>
+<title>LineRage</title>
 
 <link rel="icon" type="image/png" href="icon.png" />
 <link href="css/base.css" rel="stylesheet" type="text/css"/>
@@ -12,12 +12,18 @@
 </head>
 <body>
 
-<div id="intro">End of the Line. Don't hit things.</div>
-<div id="game">
-    <nav></nav>
-    <canvas id="game_canvas" width="640" height="480" style="background: #000;"></canvas>
+<div id="content">
+    <div id="header">
+        <span id="score">0</span>
+        <h1>LineRage</h1>
+    </div>
+    <div id="game">
+        <div id="hud" style="display: none;"></div>
+        <canvas id="dynamic_canvas" width="640" height="480" style="z-index: 2;"></canvas>
+        <canvas id="static_canvas" width="640" height="480" style="z-index: 1;"></canvas>
+    </div>
+    <div id="messages"></div>
 </div>
-<div id="messages">Loading.</div>
 
 <script src="js/extern/jquery-1.4.4.min.js"></script>
 <script src="js/extern/jquery.disable.text.select.js"></script>

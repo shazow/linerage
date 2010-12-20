@@ -84,7 +84,7 @@ Player.prototype = {
     get_pos: function() {
         // Get normalized position on context
         return [Math.round(this.pos[0]), Math.round(this.pos[1])];
-    },
+    }
 }
 
 Player.CONTROL_KEYS = ['left', 'right'];

@@ -1,12 +1,12 @@
 function Game(canvases) {
     // TODO: Put these guys into a clojure scope to reduce instance access
     this.contexts = {
-        'level': canvases.static.getContext("2d"),
-        'entities': canvases.dynamic.getContext("2d")
+        'level': canvases['static'].getContext("2d"),
+        'entities': canvases['dynamic'].getContext("2d")
     }
     this.contexts.entities.lineWidth = 1.5;
 
-    this.size = [canvases.static.width, canvases.static.height];
+    this.size = [canvases['static'].width, canvases['static'].height];
 
     this.players = [];
     this.num_players = this.players.length;
@@ -252,5 +252,5 @@ Game.prototype = {
             }
         }
         this._controls_cache = cache;
-    },
+    }
 }

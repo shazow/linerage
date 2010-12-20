@@ -51,7 +51,7 @@ Level.prototype = {
         if(this.state.level_collider.get(pos)) return true;
 
         return this.state.entity_collider.get(pos);
-    },
+    }
 }
 
 function LevelState(size, entities, contexts) {

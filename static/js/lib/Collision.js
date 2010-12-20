@@ -108,7 +108,7 @@ EntityCollider.prototype = {
 
         // FIXME: No circles for now.
         return true;
-
+        /*
         // Check circles
         var circles = this.circles;
         for(var i=circles.length-1; i>=0; i--) {
@@ -117,6 +117,7 @@ EntityCollider.prototype = {
         }
 
         return true;
+        */
     }
 }
 
