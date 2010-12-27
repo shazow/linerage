@@ -1,3 +1,5 @@
+/** Geometry and vectors **/
+
 function in_boundary(pos, box) {
     return pos[0] >= box[0] && // x1
            pos[1] >= box[1] && // y1
@@ -11,7 +13,7 @@ function in_radius(pos, circle_pos, circle_radius) {
 }
 
 function boundary_center(box) {
-    return [box[0] - (box[0]-box[2])/2, box[1] - (box[1]-box[3])/2];
+    return [box[0] - (box[0]-box[2]) / 2, box[1] - (box[1]-box[3]) / 2];
 }
 
 function bounding_square(pos, size) {
@@ -27,25 +29,65 @@ function rotate(vector, angle) {
     return [x * cos - y * sin, x * sin + y * cos];
 }
 
-function ctx_xy_to_rgb(ctx, xy) {
-    var img=ctx.getImageData(xy[0],xy[1],1,1);
-    return [img.data[0], img.data[1], img.data[2]];
-}
 
-function Cycle(a) {
-    this.a = a;
-    this.i = 0;
-    this.length = a.length;
-}
-Cycle.prototype = {
-    next: function() {
-        var i = this.i;
-        var r = this.a[i];
-        if(i < this.length - 1) this.i++;
-        else this.i = 0;
-        return r;
+/** Binary Search **/
+
+var binary_search = function(a, val, compare_fn) {
+    // Returns (positive) index of element if found (not necessarily the first),
+    // otherwise (negative) negated index of insertion point.
+
+    var left = 0, right = a.length;
+
+    // Tight loop optimization
+    if(compare_fn) {
+        while(left < right) {
+            var middle = (left + right) >> 1;
+            compare_fn(a[middle], val) ? left = middle + 1 : right = middle;
+        }
+        return compare_fn(a[left], val) ? left : ~left;
+    } else {
+        while(left < right) {
+            var middle = (left + right) >> 1;
+            a[middle] < val ? left = middle + 1 : right = middle;
+        }
+        return a[left] == val ? left : ~left;
     }
 }
+
+var binary_insert = function(a, val, compare_fn) {
+    // Returns position of insertion
+
+    var i = binary_search(a, val, compare_fn);
+    if(i < 0) i = ~i;
+    a.splice(i, 0, val);
+    return i;
+}
+
+var binary_remove = function(a, val, compare_fn) {
+    // Returns removed element
+
+    var i= binary_search(a, val, compare_fn);
+    return (i >= 0) ? a.splice(i, 1)[0] : false;
+}
+
+
+
+/****/
+
+function Cycle(a) {
+    var i = 0, stop = a.length;
+    return function() {
+        if(i==stop) i = 0;
+        return a[i++];
+    }
+}
+
+function CounterCallback(count, callback) {
+    return function() {
+        if(--count == 0) callback();
+    }
+}
+
 
 function make_grid(size, fn) {
     // size -> [dx, dy]
@@ -124,6 +166,12 @@ function draw_grid_to_ctx(grid, ctx, box) {
         ctx.fillRect(pos[0], pos[1], 1, 1);
     });
 }
+
+function ctx_xy_to_rgb(ctx, xy) {
+    var img=ctx.getImageData(xy[0],xy[1],1,1);
+    return [img.data[0], img.data[1], img.data[2]];
+}
+
 
 function flat_idx(dim, pos) {
     return (pos[0] * dim[0] * dim[2]) + (pos[1] * dim[2]) + pos[2];
