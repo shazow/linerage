@@ -1,25 +1,30 @@
-var Engine = Class({
-    loop: null,
-    is_running: false,
+(function() {
 
-    tick_factory: function() {
-        var a = Clock.update,
-            b = Global.StateMachine.run;
+    var Engine = Game.Engine = Class({
+        loop: null,
+        is_running: false,
 
-        return function() { a(); b(); };
-    },
+        tick_factory: function() {
+            var a = Clock.update,
+                b = Global.StateMachine.run;
 
-    start: function() {
-        if(this.is_running) return;
+            return function() { a(); b(); };
+        },
 
-        Clock.update();
-        this.is_running = true;
-        this.loop = setInterval(this.tick_factory(), 1000 / 30);
-    },
+        start: function() {
+            if(this.is_running) return;
 
-    stop: function() {
-        clearInterval(this.loop);
-        this.is_running = false;
-    }
-});
-Global.Engine = Engine();
+            Clock.update();
+            this.is_running = true;
+            this.loop = setInterval(this.tick_factory(), 1000 / 30);
+        },
+
+        stop: function() {
+            clearInterval(this.loop);
+            this.is_running = false;
+        }
+    });
+
+    Static.Engine = Engine();
+
+}();

@@ -1,4 +1,4 @@
-var Renderer = Class({
+Game.Renderer = Class({
     container: null,
     layers: [],
 
