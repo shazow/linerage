@@ -1,22 +1,26 @@
-Game.Renderer = Class({
-    container: null,
-    layers: [],
+(function() {
 
-    /**
-     * @param {Camera} camera       Camera element responsible for drawing the viewport.
-     * @param {number=} num_layers  Number of canvas layers to create.
-     */
-    init: function(camera, num_layers) {
-        this.container = camera.element;
+    var Renderer = Game.Renderer = Class({
+        container: null,
+        layers: [],
 
-        var attrs = {'width': camera.width, 'height': camera.height};
+        /**
+         * @param {Camera} camera       Camera element responsible for drawing the viewport.
+         * @param {number=} num_layers  Number of canvas layers to create.
+         */
+        init: function(camera, num_layers) {
+            this.container = camera.element;
 
-        var i = num_layers || 1;
+            var attrs = {'width': camera.width, 'height': camera.height};
 
-        while(i--) {
-            var layer = Dom.create("canvas", attrs);
-            this.layers.push(layer.getContext('2d'));
-            this.container.appendChild(layer);
-        }
-    },
-});
+            var i = num_layers || 1;
+
+            while(i--) {
+                var layer = Dom.create("canvas", attrs);
+                this.layers.push(layer.getContext('2d'));
+                this.container.appendChild(layer);
+            }
+        },
+    });
+
+})();

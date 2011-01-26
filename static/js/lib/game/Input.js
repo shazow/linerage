@@ -1,14 +1,18 @@
 (function() {
 
     var Input = Game.Input = Class({
-        bindings: {},
-        pressed: {},
-        queued: {},
+        bindings: null,
+        pressed: null,
+        queued: null,
 
         _handler_keydown: null,
         _handler_keyup: null,
 
         init: function() {
+            this.bindings = {};
+            this.pressed = {};
+            this.queued = {};
+
             var self = this;
             this._handler_keydown = function(e) { self.keydown(e); };
             this._handler_keyup = function(e) { self.keyup(e); };
@@ -181,5 +185,9 @@
         220: "\\",
         221: "]",
         224: "WIN_KEY"};
+
+    Input.KEY_CODES_LOOKUP = inverse_lookup(Input.KEY_CODES);
+
+    Static.Input = new Input();
 
 })();

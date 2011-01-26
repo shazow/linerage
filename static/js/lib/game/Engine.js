@@ -25,6 +25,6 @@
         }
     });
 
-    Static.Engine = Engine();
+    Static.Engine = new Engine();
 
 }();
