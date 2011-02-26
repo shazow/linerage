@@ -90,6 +90,18 @@ function Cycle(a) {
     }
 }
 
+/**
+ * Execute ``callback`` after ``count`` calls.
+ *
+ * var cb = CounterCallback(5, function() { alert('Hello World'); });
+ * for(var i=0; i<5; i++) {
+ *     some_async_func(cb); // alert pops up when i == 4
+ * }
+ *
+ * @param   {int} count
+ * @param   {function} callback
+ * @return  {function}
+ */
 function CounterCallback(count, callback) {
     return function() {
         if(--count == 0) callback();
