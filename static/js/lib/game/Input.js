@@ -73,9 +73,17 @@
             }
         },
         queue: function(key, fn) {
-            // Queue a one-time execution of fn when key is pressed.
-            if(this.bindings[key]) throw Error('One-time bind must be an unassigned key.');
+            var has_binding = this.bindings[key];
+            if(has_binding) {
+                // Wrap fn to restore original binding.
+                var self = this;
+                fn = function() {
+                    fn();
+                    self.bindings[key] = has_binding;
+                };
+            }
 
+            // Queue a one-time execution of fn when key is pressed.
             var queue = this.queued[key] || [];
             queue.push(fn);
 
