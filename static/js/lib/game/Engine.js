@@ -27,4 +27,4 @@
 
     Static.Engine = new Engine();
 
-}();
+})();
