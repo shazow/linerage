@@ -92,7 +92,7 @@ Player.TEMPLATE_LIST = [
     {color: 'rgb(150,30,20)', name: 'Red Player', controls: {'left': 37, 'right': 39}}, // LEFT, RIGHT
     {color: 'rgb(40,70,140)', name: 'Blue Player', controls: {'left': 65, 'right': 83}}, // A, S
     {color: 'rgb(20,140,50)', name: 'Green Player', controls: {'left': 75, 'right': 76}}, // K, S
-    {color: 'rgb(160,140,30)', name:  'Yellow Player', controls: {'left': 101, 'right': 103}} // NUM_4, NUM_6
+    {color: 'rgb(160,140,30)', name: 'Yellow Player', controls: {'left': 101, 'right': 103}} // NUM_4, NUM_6
 ]
 Player.EVENTS = {
     FALL_OFF: 1,
