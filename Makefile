@@ -34,8 +34,8 @@ static: tree $(STATIC_MANIFEST) $(BUILD_DIR)/index.html
 
 build: tree js static
 
-serve: build
-	cd $(BUILD_DIR)
+serve:
+	@echo "http://localhost:8000/src/index.html"
 	python -m SimpleHTTPServer
 
 dist: clean build

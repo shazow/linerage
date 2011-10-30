@@ -18,41 +18,37 @@
         <h1>LineRage</h1>
     </div>
     <div id="game">
-        <div id="hud" style="display: none;"></div>
-        <canvas id="dynamic_canvas" width="640" height="480" style="z-index: 2;"></canvas>
-        <canvas id="static_canvas" width="640" height="480" style="z-index: 1;"></canvas>
     </div>
     <div id="messages"></div>
 </div>
 
-<script src="js/extern/jquery-1.4.4.min.js"></script>
-<script src="js/extern/jquery.disable.text.select.js"></script>
+<script src="/externs/jquery.min.js"></script>
+<script src="/externs/jquery.disable.text.select.js"></script>
 
-<script src="js/lib/Class.js"></script>
-<script src="js/lib/Dom.js"></script>
+<script src="/externs/gameblocks/externs/Class.js"></script>
+<script src="/externs/gameblocks/externs/unstdlib.js"></script>
+<script src="/externs/gameblocks/externs/Dom.js"></script>
 
-<script src="js/lib/Util.js"></script>
-<script src="js/lib/Clock.js"></script>
-<script src="js/lib/Collision.js"></script>
+<script src="/externs/gameblocks/src/Camera.js"></script>
+<script src="/externs/gameblocks/src/Clock.js"></script>
+<script src="/externs/gameblocks/src/Engine.js"></script>
+<script src="/externs/gameblocks/src/Entity.js"></script>
+<script src="/externs/gameblocks/src/Input.js"></script>
+<script src="/externs/gameblocks/src/Renderer.js"></script>
+<script src="/externs/gameblocks/src/State.js"></script>
+<script src="/externs/gameblocks/src/Sprite.js"></script>
 
-<script src="js/lib/game/Global.js"></script>
-<script src="js/lib/game/Input.js"></script>
-<script src="js/lib/game/State.js"></script>
-<script src="js/lib/game/Engine.js"></script>
-<script src="js/lib/game/Renderer.js"></script>
-<script src="js/lib/game/Camera.js"></script>
 
-<script src="js/core/Player.js"></script>
-<script src="js/core/Level.js"></script>
-<script src="js/core/Entity.js"></script>
+<script src="/src/js/core/Player.js"></script>
+<script src="/src/js/core/Level.js"></script>
+<script src="/src/js/core/Entity.js"></script>
 
-<script src="js/core/Game.js"></script>
-<script src="js/core/Hud.js"></script>
-
-<script src="js/core/Init.js"></script>
+<script src="/src/js/core/Game.js"></script>
+<script src="/src/js/core/Hud.js"></script>
+<script src="/src/js/core/Init.js"></script>
 
 <!-- Dev only -->
-<script src="js/dev/Stats.js"></script>
+<script src="/externs/stats.js"></script>
 <script type="text/javascript">
     stats = new Stats();
     stats.domElement.style.position = 'absolute';
