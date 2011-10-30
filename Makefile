@@ -5,9 +5,8 @@ VPATH = $(SOURCE_DIR)
 CLOSURE_COMPILER = java -jar util/compiler.jar
 
 JS_MANIFEST := $(SOURCE_DIR)/js/core/*.js $(SOURCE_DIR)/js/lib/*.js
-JS_EXTERNS := $(SOURCE_DIR)/js/extern/*.js
+#JS_EXTERNS := $(SOURCE_DIR)/js/extern/*.js
 STATIC_MANIFEST := $(addprefix $(BUILD_DIR)/,$(shell cd $(SOURCE_DIR) && find {levels,images} -type f))
-STATIC_DIRS := $(dir $(STATIC_MANIFEST))
 
 $(BUILD_DIR)/js/all.js: $(JS_MANIFEST)
 	$(CLOSURE_COMPILER) \
@@ -26,11 +25,8 @@ $(BUILD_DIR)/%: %
 
 all: build
 
-$(STATIC_DIRS): $(patsubst $(BUILD_DIR),$(SOURCE_DIR),$(STATIC_DIR))
-	echo $?
-
-tree: $(STATIC_DIRS)
-	mkdir -p $?
+tree:
+	mkdir -p $(dir $(STATIC_MANIFEST)) $(BUILD_DIR)/css $(BUILD_DIR)/js
 
 js: tree $(BUILD_DIR)/js/all.js
 
