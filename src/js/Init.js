@@ -1,5 +1,6 @@
 $("body").disableTextSelect();
 
+
 var div_game = Dom.select("#game")
 var camera = new Game.Camera(div_game, {width: 640, height: 480});
 var renderer = new Game.Renderer(camera, 2);
