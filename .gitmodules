@@ -1,0 +1,3 @@
+[submodule "externs/gameblocks"]
+	path = externs/gameblocks
+	url = /Users/shazow/projects/gameblocks.js/
