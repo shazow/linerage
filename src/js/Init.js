@@ -40,16 +40,6 @@ state_machine.add('loading', {
     }
 });
 
-var change_level = function(pack, level_idx) {
-    pack.levels_idx = level_idx;
-    current_level = pack.levels[level_idx];;
-
-    state_machine.enter('loading');
-    current_level.load(contexts, function() {
-        state_machine.enter('play');
-    });
-}
-
 state_machine.add('levels', {
     'enter': function() {
         $(div_hud).empty();
@@ -71,7 +61,15 @@ state_machine.add('levels', {
             var li_level = $('<li></li>').click((function(level_idx) {
                 // FIXME: Holy closure hax galore.
                 return function() {
-                    return change_level(pack, level_idx);
+                    (function(pack, level_idx) {
+                        pack.levels_idx = level_idx;
+                        current_level = pack.levels[level_idx];;
+
+                        state_machine.enter('loading');
+                        current_level.load(contexts, function() {
+                            state_machine.enter('play');
+                        });
+                    })(pack, level_idx);
                 }
             })(level_idx)).appendTo(ul);
 
