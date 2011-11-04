@@ -106,7 +106,7 @@ h1.active {
     background: #000;
     border: 5px solid #292929;
 }
-#game > * {
+#game > *, #game canvas {
     position: absolute;
     width: 640px;
     height: 480px;
