@@ -15,25 +15,24 @@ var LineRage = (function(exports) {
         is_active: true,
         move_buffer: null,
 
-        init: function(config) {
-            this.reset();
-
-            // Init
+        init: function(input, config) {
+            this.input = input;
             this.color = config.color || 'rgb(255,255,255)';
-            this.name = config.name || 'Anonymous';
-            this.controls = config.controls;
+            this.name = config.name || 'Hypotenuse';
+            this.control_labels = config.control_labels || {'left': 'p1_left', 'right': 'p1_right'};
         },
         move: function(ctx, level, time_delta) {
-            if(this.move_buffer) {
-                if(this.move_buffer == 'left') this.angle -= this.turn_rate * time_delta / 1000;
-                else if(this.move_buffer == 'right') this.angle += this.turn_rate * time_delta / 1000;
+            if(this.input.pressed(this.control_labels['left'])) {
+                this.angle -= this.turn_rate * time_delta / 1000;
+            } else if(this.input.pressed(this.control_labels['right'])) {
+                 this.angle += this.turn_rate * time_delta / 1000;
             }
 
             var old_pos = this.get_pos();
 
             var x = this.pos.x, y = this.pos.y;
-            var delta = rotate([this.speed * time_delta / 100, 0], this.angle * Math.PI);
-            this.pos = [x + delta[0], y + delta[1]];
+            var delta = rotate({x: this.speed * time_delta / 100, y: 0}, this.angle * Math.PI);
+            this.pos = {x: x + delta.x, y: y + delta.y};
 
             var new_pos = this.get_pos();
             var self = this;
@@ -54,10 +53,8 @@ var LineRage = (function(exports) {
                 iter_line(old_pos, new_pos, function(pos) {
                     if(pos.x == old_pos.x && pos.y == old_pos.y) return true; // Skip the first one
 
-                    var hit = level.is_collision(pos);
+                    var hit = level.state.is_collision(pos, true);
                     if(!hit) {
-                        // FIXME: This is a ridiculous chain.
-                        collider.set(pos, true);
                         return true;
                     }
 
@@ -81,17 +78,10 @@ var LineRage = (function(exports) {
         },
         get_pos: function() {
             // Get normalized position on context
-            return [Math.round(this.pos.x), Math.round(this.pos.y)];
+            return {x: Math.round(this.pos.x), y: Math.round(this.pos.y)};
         }
     }
 
-    Player.CONTROL_KEYS = ['left', 'right'];
-    Player.TEMPLATE_LIST = [
-        {color: 'rgb(150,30,20)', name: 'Red Player', controls: {'left': 37, 'right': 39}}, // LEFT, RIGHT
-        {color: 'rgb(40,70,140)', name: 'Blue Player', controls: {'left': 65, 'right': 83}}, // A, S
-        {color: 'rgb(20,140,50)', name: 'Green Player', controls: {'left': 75, 'right': 76}}, // K, S
-        {color: 'rgb(160,140,30)', name: 'Yellow Player', controls: {'left': 101, 'right': 103}} // NUM_4, NUM_6
-    ]
     Player.EVENTS = {
         FALL_OFF: 1,
         COLLIDED: 2,

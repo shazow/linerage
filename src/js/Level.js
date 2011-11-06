@@ -4,10 +4,14 @@ var LineRage = (function(exports) {
 
     var Level = exports.Level = Class({
         size: {x: 0, y: 0, width: 640, height: 480},
+
         is_loaded: false,
         is_locked: true,
+
         high_score: null,
         times_played: 0,
+
+        state: null,
 
         init: function(config) {
             this.src = config.url;
@@ -49,7 +53,6 @@ var LineRage = (function(exports) {
             last_loaded = self;
         },
         is_collision: function(pos) {
-            return false; // XXX: TODO
             if(this.state.level_collider.get(pos)) return true;
 
             return this.state.entity_collider.get(pos);

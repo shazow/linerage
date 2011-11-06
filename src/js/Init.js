@@ -19,7 +19,21 @@ var div_hud = Dom.select("#hud");
 
 var current_level = false;
 var current_pack = false;
-var packs = null;
+
+var players = [];
+
+
+var change_level = function(pack, level_idx) {
+    pack.levels_idx = level_idx;
+
+    current_pack = pack;
+    current_level = pack.levels[level_idx];
+
+    state_machine.enter('loading');
+    current_level.load(contexts, function() {
+        state_machine.enter('play');
+    });
+}
 
 
 state_machine.add('intro', {
@@ -59,21 +73,15 @@ state_machine.add('levels', {
         for(var istop=pack.levels.length; level_idx<istop; level_idx++) {
 
             (function(level_idx) {
+                var level = pack.levels[level_idx];
 
                 var li_level = $('<li></li>').click(function() {
-                    pack.levels_idx = level_idx;
-                    current_level = pack.levels[level_idx];;
-
-                    state_machine.enter('loading');
-                    current_level.load(contexts, function() {
-                        state_machine.enter('play');
-                    });
+                    change_level(pack, level_idx);
                 }).appendTo(ul);
 
-                var level = pack.levels[level_idx];
                 if(level.is_locked) li_level.addClass("locked");
                 // TODO: High score, etc.
-                //
+
             })(level_idx);
         }
 
@@ -85,15 +93,39 @@ state_machine.add('play', {
     'enter': function() {
         $(div_hud).empty().hide();
         $(div_header).html('<span class="score">0</span>');
+    },
+
+    'run': function() {
+        var time_delta = clock.tick();
+
+        for(var i=0, istop=players.length; i<istop; i++) {
+            var p = players[i];
+            if(p.is_active) p.move(contexts.player, current_level, time_delta);
+        }
+
     }
 });
 
 state_machine.add('lose', {
-    'enter': function() {
+    // TODO: ...
+});
 
-    }
+state_machine.add('pause', {
+    // TODO: ...
+});
+
+state_machine.add('win', {
+    // TODO: ...
 });
 
 
 state_machine.enter('intro');
+
+
+input.bind({
+    'RIGHT_ARROW': 'p1_right',
+    'LEFT_ARROW': 'p1_left',
+});
+
+
 input.keyboard_start();
