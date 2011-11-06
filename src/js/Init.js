@@ -58,25 +58,23 @@ state_machine.add('levels', {
         var level_idx = 0;
         for(var istop=pack.levels.length; level_idx<istop; level_idx++) {
 
-            var li_level = $('<li></li>').click((function(level_idx) {
-                // FIXME: Holy closure hax galore.
-                return function() {
-                    (function(pack, level_idx) {
-                        pack.levels_idx = level_idx;
-                        current_level = pack.levels[level_idx];;
+            (function(level_idx) {
 
-                        state_machine.enter('loading');
-                        current_level.load(contexts, function() {
-                            state_machine.enter('play');
-                        });
-                    })(pack, level_idx);
-                }
-            })(level_idx)).appendTo(ul);
+                var li_level = $('<li></li>').click(function() {
+                    pack.levels_idx = level_idx;
+                    current_level = pack.levels[level_idx];;
 
-            var level = pack.levels[level_idx];
-            if(level.is_locked) li_level.addClass("locked");
-            // TODO: High score, etc.
-            //
+                    state_machine.enter('loading');
+                    current_level.load(contexts, function() {
+                        state_machine.enter('play');
+                    });
+                }).appendTo(ul);
+
+                var level = pack.levels[level_idx];
+                if(level.is_locked) li_level.addClass("locked");
+                // TODO: High score, etc.
+                //
+            })(level_idx);
         }
 
         $(div_hud).html(div_levels).show();

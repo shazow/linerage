@@ -1,7 +1,7 @@
 var LineRage = (function(exports) {
 
     var Player = exports.Player = Class({
-        pos: [0, 0],
+        pos: {x: 0, y: 0},
 
         speed: 8, // Pixels per second
         turn_rate: 8 / 5.5, // Radians per second
@@ -31,7 +31,7 @@ var LineRage = (function(exports) {
 
             var old_pos = this.get_pos();
 
-            var x = this.pos[0], y = this.pos[1];
+            var x = this.pos.x, y = this.pos.y;
             var delta = rotate([this.speed * time_delta / 100, 0], this.angle * Math.PI);
             this.pos = [x + delta[0], y + delta[1]];
 
@@ -39,9 +39,9 @@ var LineRage = (function(exports) {
             var self = this;
 
             // Skip render to rounding?
-            if(new_pos[0] == old_pos[0] && new_pos[1] == old_pos[1]) return;
+            if(new_pos.x == old_pos.x && new_pos.y == old_pos.y) return;
 
-            if(!in_boundary(new_pos, [0,0,level.size[0]-1, level.size[1]-1])) {
+            if(!in_boundary(new_pos, level.size)) {
                 this.is_active = false;
                 $(window).trigger('die', [self, Player.EVENTS.FALL_OFF]);
 
@@ -52,7 +52,7 @@ var LineRage = (function(exports) {
                 var collider = level.state.entity_collider.collider;
 
                 iter_line(old_pos, new_pos, function(pos) {
-                    if(pos[0] == old_pos[0] && pos[1] == old_pos[1]) return true; // Skip the first one
+                    if(pos.x == old_pos.x && pos.y == old_pos.y) return true; // Skip the first one
 
                     var hit = level.is_collision(pos);
                     if(!hit) {
@@ -75,13 +75,13 @@ var LineRage = (function(exports) {
             ctx.strokeStyle = this.color;
             ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(old_pos[0], old_pos[1]);
-            ctx.lineTo(new_pos[0], new_pos[1]);
+            ctx.moveTo(old_pos.x, old_pos.y);
+            ctx.lineTo(new_pos.x, new_pos.y);
             ctx.stroke();
         },
         get_pos: function() {
             // Get normalized position on context
-            return [Math.round(this.pos[0]), Math.round(this.pos[1])];
+            return [Math.round(this.pos.x), Math.round(this.pos.y)];
         }
     }
 
