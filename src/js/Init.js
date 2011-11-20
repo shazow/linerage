@@ -17,8 +17,9 @@ var contexts = {
 var div_header = Dom.select("#header");
 var div_hud = Dom.select("#hud");
 
-var current_level = false;
-var current_pack = false;
+var packs = null;
+var current_level = null;
+var current_pack = null;
 
 var players = [];
 
