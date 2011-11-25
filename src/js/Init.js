@@ -1,6 +1,7 @@
 $("body").disableTextSelect();
 
-var log = function() {}; // Default off
+var log = log || function() {}; // Default off
+var stats = stats || function() {};
 
 var div_game = Dom.select("#game")
 var camera = new Game.Camera(div_game, {width: 640, height: 480});

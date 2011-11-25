@@ -261,3 +261,16 @@ h1.active {
     -webkit-border-radius: 3px;
     border-radius: 3px;
 }
+
+dl.stats {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 5px;
+    font-size: 10px;
+    text-align: right;
+}
+dl.stats dd {
+    color: #cc2;
+    margin-bottom: 0.5em;
+}
