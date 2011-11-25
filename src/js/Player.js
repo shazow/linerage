@@ -7,6 +7,10 @@ var LineRage = (function(exports) {
         turn_rate: 8 / 5.5, // Radians per second
         angle: 0,
 
+        color: 'rgb(255,255,255)',
+        name: 'Hypotenuse',
+        control_labels: {'left': 'p1_left', 'right': 'p1_right'},
+
         max_time_alive: 0,
         num_wins: 0,
         num_deaths: 0,
@@ -17,21 +21,24 @@ var LineRage = (function(exports) {
 
         init: function(input, config) {
             this.input = input;
-            this.color = config.color || 'rgb(255,255,255)';
-            this.name = config.name || 'Hypotenuse';
-            this.control_labels = config.control_labels || {'left': 'p1_left', 'right': 'p1_right'};
+
+            if(config) {
+                this.color = config.color || 'rgb(255,255,255)';
+                this.name = config.name || 'Hypotenuse';
+                this.control_labels = config.control_labels || {'left': 'p1_left', 'right': 'p1_right'};
+            }
         },
         move: function(ctx, level, time_delta) {
-            if(this.input.pressed(this.control_labels['left'])) {
+            if(this.input.pressed[this.control_labels['left']]) {
                 this.angle -= this.turn_rate * time_delta / 1000;
-            } else if(this.input.pressed(this.control_labels['right'])) {
-                 this.angle += this.turn_rate * time_delta / 1000;
+            } else if(this.input.pressed[this.control_labels['right']]) {
+                this.angle += this.turn_rate * time_delta / 1000;
             }
 
             var old_pos = this.get_pos();
 
             var x = this.pos.x, y = this.pos.y;
-            var delta = rotate({x: this.speed * time_delta / 100, y: 0}, this.angle * Math.PI);
+            var delta = unstdlib.rotate({x: this.speed * time_delta / 100, y: 0}, this.angle * Math.PI);
             this.pos = {x: x + delta.x, y: y + delta.y};
 
             var new_pos = this.get_pos();
@@ -40,7 +47,7 @@ var LineRage = (function(exports) {
             // Skip render to rounding?
             if(new_pos.x == old_pos.x && new_pos.y == old_pos.y) return;
 
-            if(!in_boundary(new_pos, level.size)) {
+            if(!unstdlib.in_boundary(new_pos, level.size)) {
                 this.is_active = false;
                 $(window).trigger('die', [self, Player.EVENTS.FALL_OFF]);
 
@@ -48,12 +55,12 @@ var LineRage = (function(exports) {
 
                 // FIXME: Clean this up, it's fugly.
 
-                var collider = level.state.entity_collider.collider;
+                //var collider = level.state.entity_collider.collider;
 
-                iter_line(old_pos, new_pos, function(pos) {
+                unstdlib.iter_line(old_pos, new_pos, function(pos) {
                     if(pos.x == old_pos.x && pos.y == old_pos.y) return true; // Skip the first one
 
-                    var hit = level.state.is_collision(pos, true);
+                    var hit = level.is_collision(pos, true);
                     if(!hit) {
                         return true;
                     }
@@ -80,7 +87,7 @@ var LineRage = (function(exports) {
             // Get normalized position on context
             return {x: Math.round(this.pos.x), y: Math.round(this.pos.y)};
         }
-    }
+    });
 
     Player.EVENTS = {
         FALL_OFF: 1,

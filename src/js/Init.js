@@ -1,5 +1,6 @@
 $("body").disableTextSelect();
 
+var log = function() {}; // Default off
 
 var div_game = Dom.select("#game")
 var camera = new Game.Camera(div_game, {width: 640, height: 480});
@@ -39,6 +40,10 @@ var change_level = function(pack, level_idx) {
 
 state_machine.add('intro', {
     'enter': function() {
+        players = [
+            new LineRage.Player(input)
+        ]
+
         $(div_header).html('<h1>LineRage</h1>');
 
         var div_play = $('<div id="play">Play</div>').click(function() {
@@ -94,6 +99,12 @@ state_machine.add('play', {
     'enter': function() {
         $(div_hud).empty().hide();
         $(div_header).html('<span class="score">0</span>');
+
+        engine.start();
+    },
+
+    'exit': function() {
+        engine.stop();
     },
 
     'run': function() {
@@ -101,7 +112,9 @@ state_machine.add('play', {
 
         for(var i=0, istop=players.length; i<istop; i++) {
             var p = players[i];
-            if(p.is_active) p.move(contexts.player, current_level, time_delta);
+            if(p.is_active) {
+                p.move(contexts.player, current_level, time_delta);
+            }
         }
 
     }
@@ -125,7 +138,7 @@ state_machine.enter('intro');
 
 input.bind({
     'RIGHT_ARROW': 'p1_right',
-    'LEFT_ARROW': 'p1_left',
+    'LEFT_ARROW': 'p1_left'
 });
 
 

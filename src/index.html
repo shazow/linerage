@@ -39,12 +39,12 @@
 
 <script src="/src/levels/index.js"></script>
 <!--
-<script src="/src/js/Player.js"></script>
 <script src="/src/js/Entity.js"></script>
 
 <script src="/src/js/Game.js"></script>
 <script src="/src/js/Hud.js"></script>
 -->
+<script src="/src/js/Player.js"></script>
 <script src="/src/js/Level.js"></script>
 <script src="/src/js/Init.js"></script>
 
@@ -57,6 +57,10 @@
     stats.domElement.style.right = '0';
 
     $("body")[0].appendChild(stats.domElement);
+
+    var log = function(msg) {
+        console && console.log(msg);
+    }
 </script>
 <!-- -->
 
