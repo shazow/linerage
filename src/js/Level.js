@@ -2,8 +2,26 @@ var LineRage = (function(exports) {
 
     var last_loaded = null;
 
+
+    /***/
+
+
+    var LEVEL_MODES = {
+        GOAL: 0,
+        DEATHMATCH: 1
+    }
+
     var Level = exports.Level = Class({
         size: {x: 0, y: 0, width: 640, height: 480},
+
+        src: null,
+        img: null,
+        name: 'Unnamed',
+        description: 'Don\'t hit things.',
+        entities: [],
+        min_players: 1,
+        max_players: 1,
+        mode: LEVEL_MODES.GOAL,
 
         is_loaded: false,
         is_locked: true,
@@ -17,15 +35,16 @@ var LineRage = (function(exports) {
             this.src = config.url;
             this.img = new Image();
 
-            this.config = config;
-            this.name = config.name
-            this.description = config.description;
-            this.min_players = config.min_players || 0;
-            this.max_players = Math.min(config.min_players || 4, this.min_players);
-            this.is_deathmatch = config.is_deathmatch || false;
+            if(config) {
+                this.name = config.name || this.name;
+                this.description = config.description || this.descripton;
+                this.min_players = config.min_players || this.min_players;
+                this.max_players = config.max_players || this.max_players;
+            }
         },
         unload: function() {
             this.is_loaded = false;
+            this.state = null;
         },
         load: function(contexts, callback) {
             if(last_loaded && last_loaded != this) last_loaded.unload();
@@ -38,6 +57,7 @@ var LineRage = (function(exports) {
 
                 if(!self.is_loaded) {
                     self.is_loaded = true;
+                    self.state = new LevelState(contexts, self.entities, self.size);
                 }
 
                 if(callback!==undefined) callback();
@@ -52,21 +72,72 @@ var LineRage = (function(exports) {
 
             last_loaded = self;
         },
-        is_collision: function(pos) {
-            if(this.state.level_collider.get(pos)) return true;
-
-            return this.state.entity_collider.get(pos);
+        is_collision: function(entity) {
+            return this.state.is_collision(entity);
         }
     });
 
-    var MODES = {
+    Level.MODES = LEVEL_MODES;
+
+
+    /***/
+
+
+    var LevelState = exports.LevelState = Class({
+        size: {x: 0, y: 0, width: 640, height: 480},
+        contexts: {},
+        entities: [],
+
+        score: 0,
+        start_positions: [],
+        colliders: {},
+
+        init: function(contexts, entities, size) {
+            this.contexts = contexts;
+            this.entities = entities || this.entities;
+            this.size = size || this.size;
+
+            // TODO: Invent a CompoundCollider
+            this.colliders = {
+                entity: new Game.ShapeCollider(),
+                level: new Game.BitmapCollider(this.size)
+            };
+
+            this.colliders.level.add_canvas(contexts.level);
+        },
+        reset: function() {
+            this.score = 0;
+            this.start_positions = [];
+
+            this.contexts.entity.clearRect(0, 0, this.size.width, this.size.height);
+            this.colliders.entity.init();
+
+            // TODO: this.load_entities();
+        },
+        is_collision: function(entity) {
+            var r = this.colliders.level.is_collision(entity);
+            if(r) return r;
+
+            var r = this.colliders.entity.is_collision(entity);
+            if(r) return r;
+
+            return false;
+        }
+    });
+
+
+
+    /***/
+
+
+    var PACK_MODES = {
         NORMAL: 0,
         LOOP: 1,
         RANDOM: 2
     }
 
     var LevelPack = exports.LevelPack = Class({
-        mode: MODES.NORMAL,
+        mode: PACK_MODES.NORMAL,
         levels_idx: 0,
         levels: [],
 
@@ -78,10 +149,10 @@ var LineRage = (function(exports) {
         },
         next: function() {
             if(this.levels_idx >= this.levels.length-1) {
-                if(this.mode==MODES.NORMAL) return false;
-                else if(mode==MODES.LOOP) this.levels_idx = 0;
+                if(this.mode==PACK_MODES.NORMAL) return false;
+                else if(mode==PACK_MODES.LOOP) this.levels_idx = 0;
             }
-            if(this.mode==MODES.RANDOM) this.levels_idx = Math.floor(Math.random() * (this.levels.length - 1));
+            if(this.mode==PACK_MODES.RANDOM) this.levels_idx = Math.floor(Math.random() * (this.levels.length - 1));
             else this.levels_idx++;
             return this.levels[this.levels_idx];
         },
@@ -95,7 +166,11 @@ var LineRage = (function(exports) {
 
     });
 
-    LevelPack.MODES = MODES;
+    LevelPack.MODES = PACK_MODES;
+
+
+    /***/
+
 
     var load_level_index = exports.load_level_index = function(index) {
         var packs = [];

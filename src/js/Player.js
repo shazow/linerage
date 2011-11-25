@@ -60,7 +60,7 @@ var LineRage = (function(exports) {
                 unstdlib.iter_line(old_pos, new_pos, function(pos) {
                     if(pos.x == old_pos.x && pos.y == old_pos.y) return true; // Skip the first one
 
-                    var hit = level.is_collision(pos, true);
+                    var hit = level.is_collision(self, true);
                     if(!hit) {
                         return true;
                     }

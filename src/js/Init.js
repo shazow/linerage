@@ -4,7 +4,7 @@ var log = function() {}; // Default off
 
 var div_game = Dom.select("#game")
 var camera = new Game.Camera(div_game, {width: 640, height: 480});
-var renderer = new Game.Renderer(camera, 2);
+var renderer = new Game.Renderer(camera, 3);
 var input = new Game.Input();
 var state_machine = new Game.StateMachine();
 var engine = new Game.Engine(state_machine);
@@ -12,7 +12,8 @@ var clock = new Game.Clock();
 
 var contexts = {
     'level': renderer.layers[0],
-    'player': renderer.layers[1]
+    'entity': renderer.layers[1],
+    'player': renderer.layers[2]
 }
 
 var div_header = Dom.select("#header");
