@@ -27,6 +27,11 @@ var current_pack = null;
 var players = [];
 
 
+var KEY_CODES = {
+    START: Game.Input.KEY_CODES.SPACE
+}
+
+
 var change_level = function(pack, level_idx) {
     pack.levels_idx = level_idx;
 
@@ -34,7 +39,7 @@ var change_level = function(pack, level_idx) {
     current_level = pack.levels[level_idx];
 
     state_machine.enter('loading');
-    current_level.load(contexts, function() {
+    current_level.load(contexts, players, function() {
         state_machine.enter('play');
     });
 }
@@ -48,9 +53,15 @@ state_machine.add('intro', {
 
         $(div_header).html('<h1>LineRage</h1>');
 
-        var div_play = $('<div id="play">Play</div>').click(function() {
+        var next_fn = function() {
+            input.queue(KEY_CODES.START, false, true);
+
             state_machine.enter('levels');
-        });
+        };
+
+        var div_play = $('<div id="play">Play</div>').click(next_fn);
+
+        input.queue(KEY_CODES.START, next_fn);
 
         $(div_hud).html(div_play).show();
     }
@@ -97,37 +108,75 @@ state_machine.add('levels', {
     }
 });
 
+
 state_machine.add('play', {
     'enter': function() {
         $(div_hud).empty().hide();
         $(div_header).html('<span class="score">0</span>');
 
+        input.queue(KEY_CODES.START, function() {
+            state_machine.enter('pause');
+        }, true);
+
+        Game.Time.update();
+        clock.tick();
+
         engine.start();
+
+        stats('num_players', current_level.state.players.length);
     },
 
     'exit': function() {
+        input.queue(KEY_CODES.START, false, true);
         engine.stop();
     },
 
     'run': function() {
         var time_delta = clock.tick();
 
+        stats('fps', ~~(1000 / time_delta));
+        stats('ticks', clock.num_ticks);
+
+        var players = current_level.state.players;
+        var active_players = 0;
+
         for(var i=0, istop=players.length; i<istop; i++) {
             var p = players[i];
             if(p.is_active) {
-                p.move(contexts.player, current_level, time_delta);
+                active_players++;
+                var pos = p.move(contexts.player, current_level, time_delta);
+
+                if(pos) stats('player[' + i + '] pos', pos.x + ',' + pos.y);
             }
+        }
+        stats('active_players', active_players);
+
+        if(!active_players) {
+            state_machine.enter('lose');
         }
 
     }
 });
 
 state_machine.add('lose', {
-    // TODO: ...
+    'enter': function() {
+        $(div_hud).html('<div id="lose">You lose</div>').show();
+
+        input.queue(KEY_CODES.START, function() {
+            current_level.state.reset();
+            state_machine.enter('play');
+        }, true);
+    }
 });
 
 state_machine.add('pause', {
-    // TODO: ...
+    'enter': function() {
+        $(div_hud).html('<div id="paused">Paused</div>').show();
+
+        input.queue(KEY_CODES.START, function() {
+            state_machine.enter('play');
+        }, true);
+    }
 });
 
 state_machine.add('win', {

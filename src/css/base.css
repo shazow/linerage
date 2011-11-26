@@ -127,6 +127,22 @@ h1.active {
     text-align: center;
     cursor: pointer;
 }
+#hud #paused {
+    background: rgba(0,0,0,0.5);
+    color: #ddd;
+    font-size: 4em;
+    line-height: 480px;
+    text-align: center;
+    cursor: pointer;
+}
+#hud #lose {
+    background: rgba(0,0,0,0.5);
+    color: #ddd;
+    font-size: 4em;
+    line-height: 480px;
+    text-align: center;
+    cursor: pointer;
+}
 #hud #levels {
     width: 500px;
     height: 280px;

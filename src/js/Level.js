@@ -46,7 +46,7 @@ var LineRage = (function(exports) {
             this.is_loaded = false;
             this.state = null;
         },
-        load: function(contexts, callback) {
+        load: function(contexts, players, callback) {
             if(last_loaded && last_loaded != this) last_loaded.unload();
 
             var self = this;
@@ -57,7 +57,7 @@ var LineRage = (function(exports) {
 
                 if(!self.is_loaded) {
                     self.is_loaded = true;
-                    self.state = new LevelState(contexts, self.entities, self.size);
+                    self.state = new LevelState(contexts, players, self.entities, self.size);
                 }
 
                 if(callback!==undefined) callback();
@@ -86,14 +86,16 @@ var LineRage = (function(exports) {
     var LevelState = exports.LevelState = Class({
         size: {x: 0, y: 0, width: 640, height: 480},
         contexts: {},
+        players: [],
         entities: [],
 
         score: 0,
         start_positions: [],
         colliders: {},
 
-        init: function(contexts, entities, size) {
+        init: function(contexts, players, entities, size) {
             this.contexts = contexts;
+            this.players = players;
             this.entities = entities || this.entities;
             this.size = size || this.size;
 
@@ -107,12 +109,17 @@ var LineRage = (function(exports) {
         },
         reset: function() {
             this.score = 0;
-            this.start_positions = [];
 
             this.contexts.entity.clearRect(0, 0, this.size.width, this.size.height);
             this.colliders.entity.init();
 
+            this.start_positions = [{pos: {x: 15, y: 15}, angle: 24}];
             // TODO: this.load_entities();
+
+            for(var i=0, stop=this.players.length; i<stop; i++) {
+                var start_obj = this.start_positions[i] || {};
+                this.players[i].reset(start_obj.pos, start_obj.angle);
+            }
         },
         is_collision: function(entity) {
             var r = this.colliders.level.is_collision(entity);

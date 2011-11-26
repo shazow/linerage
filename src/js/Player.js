@@ -1,10 +1,13 @@
 var LineRage = (function(exports) {
 
+    var PLAYER_SPEED = 8; // Pixels per second
+    var PLAYER_TURN_RATE = 8 / 5.5; // Radians per second
+
     var Player = exports.Player = Class({
         pos: {x: 0, y: 0},
 
-        speed: 8, // Pixels per second
-        turn_rate: 8 / 5.5, // Radians per second
+        speed: PLAYER_SPEED,
+        turn_rate: PLAYER_TURN_RATE,
         angle: 0,
 
         color: 'rgb(255,255,255)',
@@ -27,6 +30,13 @@ var LineRage = (function(exports) {
                 this.name = config.name || 'Hypotenuse';
                 this.control_labels = config.control_labels || {'left': 'p1_left', 'right': 'p1_right'};
             }
+        },
+        reset: function(pos, angle) {
+            this.pos = pos;
+            this.angle = angle;
+
+            this.is_active = true;
+            this.move_buffer = null;
         },
         move: function(ctx, level, time_delta) {
             if(this.input.pressed[this.control_labels['left']]) {
@@ -60,7 +70,7 @@ var LineRage = (function(exports) {
                 unstdlib.iter_line(old_pos, new_pos, function(pos) {
                     if(pos.x == old_pos.x && pos.y == old_pos.y) return true; // Skip the first one
 
-                    var hit = level.is_collision(self, true);
+                    var hit = level.is_collision({'pos': pos}, true);
                     if(!hit) {
                         return true;
                     }
@@ -82,6 +92,8 @@ var LineRage = (function(exports) {
             ctx.moveTo(old_pos.x, old_pos.y);
             ctx.lineTo(new_pos.x, new_pos.y);
             ctx.stroke();
+
+            return new_pos;
         },
         get_pos: function() {
             // Get normalized position on context
