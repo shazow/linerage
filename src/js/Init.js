@@ -1,7 +1,7 @@
 $("body").disableTextSelect();
 
 var log = log || function() {}; // Default off
-var stats = stats || function() {};
+var stats = stats || {set: function() {}, add: function() {}};
 
 var div_game = Dom.select("#game")
 var camera = new Game.Camera(div_game, {width: 640, height: 480});
@@ -127,7 +127,7 @@ state_machine.add('play', {
 
         engine.start();
 
-        stats('num_players', current_level.state.players.length);
+        stats.set('num_players', current_level.state.players.length);
     },
 
     'exit': function() {
@@ -138,8 +138,8 @@ state_machine.add('play', {
     'run': function() {
         var time_delta = clock.tick();
 
-        stats('fps', ~~(1000 / time_delta));
-        stats('ticks', clock.num_ticks);
+        stats.set('fps', ~~(1000 / time_delta));
+        stats.set('ticks', clock.num_ticks);
 
         var players = current_level.state.players;
         var active_players = 0;
@@ -150,10 +150,10 @@ state_machine.add('play', {
                 active_players++;
                 var pos = p.move(contexts.player, current_level, time_delta);
 
-                if(pos) stats('player[' + i + '] pos', pos.x + ',' + pos.y);
+                if(pos) stats.set('player[' + i + '] pos', pos.x + ',' + pos.y);
             }
         }
-        stats('active_players', active_players);
+        stats.set('active_players', active_players);
 
         if(!active_players) {
             state_machine.enter('lose');

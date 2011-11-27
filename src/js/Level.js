@@ -102,7 +102,8 @@ var LineRage = (function(exports) {
             // TODO: Invent a CompoundCollider
             this.colliders = {
                 entity: new Game.ShapeCollider(),
-                level: new Game.BitmapCollider(this.size)
+                level: new Game.BitmapCollider(this.size),
+                player: new Game.BitmapCollider(this.size)
             };
 
             this.colliders.level.add_canvas(contexts.level);
@@ -112,7 +113,8 @@ var LineRage = (function(exports) {
 
             this.contexts.player.clearRect(0, 0, this.size.width, this.size.height);
             this.contexts.entity.clearRect(0, 0, this.size.width, this.size.height);
-            this.colliders.entity.init();
+            this.colliders.entity.reset();
+            this.colliders.player.reset();
 
             this.start_positions = [{pos: {x: 15, y: 15}, angle: 24}];
             // TODO: this.load_entities();
@@ -123,11 +125,14 @@ var LineRage = (function(exports) {
             }
         },
         is_collision: function(entity) {
+            var r = this.colliders.player.is_collision(entity);
+            if(r!==0) return r;
+
             var r = this.colliders.level.is_collision(entity);
-            if(r) return r;
+            if(r!==0) return r;
 
             var r = this.colliders.entity.is_collision(entity);
-            if(r) return r;
+            if(r!==false) return r;
 
             return false;
         }

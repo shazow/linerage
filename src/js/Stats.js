@@ -1,14 +1,21 @@
 var Stats = function(target) {
-    var data_targets = {};
-    var container = $('<dl class="stats" />').appendTo(target);
+    this.container = $('<dl class="stats" />').appendTo(target);
 
-    return function(key, value) {
-        var target = data_targets[key];
+    this.values = {};
+    this.targets = {};
+}
+Stats.prototype = {
+    set: function(key, value) {
+        this.values[key] = value;
+
+        var target = this.targets[key];
         if(!target) {
-            $('<dt>' + key + '</dt>').appendTo(container);
-            data_targets[key] = target = $('<dd />').appendTo(container);
+            $('<dt>' + key + '</dt>').appendTo(this.container);
+            this.targets[key] = target = $('<dd />').appendTo(this.container);
         }
         target[0].innerHTML = value;
+    },
+    add: function(key, value) {
+        this.set(key, (this.values[key] || 0) + value);
     }
 }
-

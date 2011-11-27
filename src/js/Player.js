@@ -65,24 +65,26 @@ var LineRage = (function(exports) {
 
                 // FIXME: Clean this up, it's fugly.
 
-                //var collider = level.state.entity_collider.collider;
+                unstdlib.iter_line(old_pos, new_pos, function(x, y) {
+                    if(x == old_pos.x && y == old_pos.y) return true; // Skip the first one
 
-                unstdlib.iter_line(old_pos, new_pos, function(pos) {
-                    if(pos.x == old_pos.x && pos.y == old_pos.y) return true; // Skip the first one
-
-                    var hit = level.is_collision({'pos': pos}, true);
-                    if(!hit) {
+                    var pos = {x: x, y: y};
+                    var hit = level.state.is_collision({pos: pos});
+                    if(hit === false) {
+                        level.state.colliders.player.add({pos: pos});
                         return true;
                     }
 
-                    if(hit===true) {
+                    stats.add('collisions', 1);
+
+                    if(hit >= 1) {
+                        $(window).trigger('die', [self, Player.EVENTS.COLLIDED]);
                         self.is_active = false;
-                        $(window).trigger('die', [self, Player.EVENTS.COLLIDED])
-                        new_pos = self.new_post = pos;
+                        new_pos = self.new_pos = pos;
                         return false;
                     }
 
-                    return hit.do_collision(self, ctx);
+                    return hit.do_collision(self);
                 });
             }
 
