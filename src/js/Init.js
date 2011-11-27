@@ -41,6 +41,7 @@ var change_level = function(pack, level_idx) {
 
     state_machine.enter('loading');
     current_level.load(contexts, players, function() {
+        current_level.state.reset();
         state_machine.enter('play');
     });
 }
@@ -78,7 +79,7 @@ state_machine.add('levels', {
     'enter': function() {
         $(div_hud).empty();
 
-        renderer.reset(camera);
+        renderer.reset();
 
         var div_levels = $('<div id="levels"></div>');
 

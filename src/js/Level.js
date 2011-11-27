@@ -110,6 +110,7 @@ var LineRage = (function(exports) {
         reset: function() {
             this.score = 0;
 
+            this.contexts.player.clearRect(0, 0, this.size.width, this.size.height);
             this.contexts.entity.clearRect(0, 0, this.size.width, this.size.height);
             this.colliders.entity.init();
 
