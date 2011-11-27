@@ -159,7 +159,7 @@ var LineRage = (function(exports) {
                 if(this.mode==PACK_MODES.NORMAL) return false;
                 else if(mode==PACK_MODES.LOOP) this.levels_idx = 0;
             }
-            if(this.mode==PACK_MODES.RANDOM) this.levels_idx = Math.floor(Math.random() * (this.levels.length - 1));
+            if(this.mode==PACK_MODES.RANDOM) this.levels_idx = ~~(Math.random() * (this.levels.length - 1));
             else this.levels_idx++;
             return this.levels[this.levels_idx];
         },

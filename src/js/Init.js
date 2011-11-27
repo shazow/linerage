@@ -28,7 +28,8 @@ var players = [];
 
 
 var KEY_CODES = {
-    START: Game.Input.KEY_CODES.SPACE
+    START: Game.Input.KEY_CODES.SPACE,
+    CANCEL: Game.Input.KEY_CODES.ESC
 }
 
 
@@ -76,6 +77,8 @@ state_machine.add('loading', {
 state_machine.add('levels', {
     'enter': function() {
         $(div_hud).empty();
+
+        renderer.reset(camera);
 
         var div_levels = $('<div id="levels"></div>');
 
@@ -160,12 +163,23 @@ state_machine.add('play', {
 
 state_machine.add('lose', {
     'enter': function() {
-        $(div_hud).html('<div id="lose">You lose</div>').show();
-
-        input.queue(KEY_CODES.START, function() {
+        var retry_fn = function() {
             current_level.state.reset();
             state_machine.enter('play');
-        }, true);
+        }
+
+        var cancel_fn = function() {
+            state_machine.enter('levels');
+        }
+
+        $(div_hud).html('<div id="lose">Try again?</div>').click(retry_fn).show();
+
+        input.queue(KEY_CODES.START, retry_fn, true);
+        input.queue(KEY_CODES.CANCEL, cancel_fn, true);
+    },
+    'exit': function() {
+        input.queue(KEY_CODES.START, false, true);
+        input.queue(KEY_CODES.CANCEL, false, true);
     }
 });
 
