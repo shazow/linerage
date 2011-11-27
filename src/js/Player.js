@@ -2,6 +2,14 @@ var LineRage = (function(exports) {
 
     var PLAYER_SPEED = 8; // Pixels per second
     var PLAYER_TURN_RATE = 8 / 5.5; // Radians per second
+    var PLAYER_SPAWN_BOX = {x: 100, y: 100, width: 440, height: 280};
+
+    var random_spawn_pos = exports.random_spawn_pos = function(spawn_box) {
+        return {
+            x: ~~(spawn_box.x + Math.random() * spawn_box.width),
+            y: ~~(spawn_box.y + Math.random() * spawn_box.height)
+        }
+    }
 
     var Player = exports.Player = Class({
         pos: {x: 0, y: 0},
@@ -10,7 +18,7 @@ var LineRage = (function(exports) {
         turn_rate: PLAYER_TURN_RATE,
         angle: 0,
 
-        color: 'rgb(255,255,255)',
+        color: 'rgb(150,30,20)',
         name: 'Hypotenuse',
         control_labels: {'left': 'p1_left', 'right': 'p1_right'},
 
@@ -34,6 +42,9 @@ var LineRage = (function(exports) {
         reset: function(pos, angle) {
             this.pos = pos;
             this.angle = angle;
+
+            this.pos = pos || random_spawn_pos(PLAYER_SPAWN_BOX);
+            this.angle = angle === undefined ? Math.random() * 2 : angle;
 
             this.is_active = true;
             this.move_buffer = null;

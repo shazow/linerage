@@ -40,6 +40,7 @@ var LineRage = (function(exports) {
                 this.description = config.description || this.descripton;
                 this.min_players = config.min_players || this.min_players;
                 this.max_players = config.max_players || this.max_players;
+                this.entities = config.entities || this.entities;
             }
         },
         unload: function() {
@@ -116,12 +117,45 @@ var LineRage = (function(exports) {
             this.colliders.entity.reset();
             this.colliders.player.reset();
 
-            this.start_positions = [{pos: {x: 15, y: 15}, angle: 24}];
-            // TODO: this.load_entities();
+            this.start_positions = [];
+            this.load_entities();
 
             for(var i=0, stop=this.players.length; i<stop; i++) {
                 var start_obj = this.start_positions[i] || {};
                 this.players[i].reset(start_obj.pos, start_obj.angle);
+            }
+        },
+        load_entities: function() {
+            var entities = this.entities;
+            if(!entities) return;
+
+            var collider = this.colliders.entity;
+
+            for(var i=entities.length-1; i>=0; i--) {
+                var e = entities[i];
+
+                switch(e.type) {
+                    case 'START':
+                        this.start_positions.push({'pos': e.pos, 'angle': e.angle});
+                        break;
+
+                    /*
+                    case 'END':
+                        this.is_deathmatch = false;
+
+                        var entity = new EndEntity(e.box);
+                        this.collider.add(entity);
+                        entity.draw(ctx);
+                        break;
+
+                    case 'BONUS':
+                        var entity = new BonusEntity(e.pos);
+
+                        this.collider.add(entity);
+                        entity.draw(ctx);
+                        break;
+                    */
+                }
             }
         },
         is_collision: function(entity) {
@@ -137,7 +171,6 @@ var LineRage = (function(exports) {
             return false;
         }
     });
-
 
 
     /***/
