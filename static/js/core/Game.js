@@ -22,7 +22,7 @@ var Game = Class({
 });
 
 
-function Game(canvases) {
+function LineRageGame(canvases) {
     // TODO: Put these guys into a clojure scope to reduce instance access
     this.contexts = {
         'level': canvases['static'].getContext("2d"),
@@ -182,7 +182,7 @@ function Game(canvases) {
         return false;
     });
 }
-Game.prototype = {
+LineRageGame.prototype = {
     pause: function() {
         clearInterval(this.loop);
 

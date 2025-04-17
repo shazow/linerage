@@ -1,7 +1,7 @@
 var game, hud, stats, levelpacks = [];
 $(document).ready(function() {
     $("body").disableTextSelect();
-    game = new Game({
+    game = new LineRageGame({
         'static': document.getElementById("static_canvas"),
         'dynamic': document.getElementById("dynamic_canvas")
     });
